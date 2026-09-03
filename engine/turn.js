@@ -6,14 +6,16 @@ export function autoChoose(event) {
   return event.choices[Math.floor(Math.random() * event.choices.length)];
 }
 
-export function runTurn(player, turnLength = 2, chooseFn = autoChoose) {
+// chooseFn can be sync (returns a choice) or async (returns a Promise<choice>),
+// so real user input (CLI prompt, web click) works the same as autoChoose.
+export async function runTurn(player, turnLength = 2, chooseFn = autoChoose) {
   player.age += turnLength;
 
   const eligible = filterEligibleEvents(EVENT_POOL, player);
   if (eligible.length === 0) return null;
 
   const event = weightedRandomPick(eligible);
-  const choice = chooseFn(event);
+  const choice = await chooseFn(event);
   applyEffects(choice.effects, player);
 
   return { event: event.id, choice: choice.id, resultText: choice.resultText };
