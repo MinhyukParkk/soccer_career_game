@@ -48,13 +48,21 @@ export function weightedRandomPick(events) {
 }
 
 export function applyEffects(effects, player) {
-  for (const [path, delta] of Object.entries(effects)) {
+  for (const [path, value] of Object.entries(effects)) {
     if (path === "delayTurns") continue; // handled by the turn engine if needed
+
+    if (path.startsWith("push:")) {
+      const arrPath = path.slice("push:".length);
+      const arr = getByPath(player, arrPath);
+      arr.push(value);
+      continue;
+    }
+
     const current = getByPath(player, path);
     if (typeof current === "number") {
-      setByPath(player, path, current + delta);
+      setByPath(player, path, current + value);
     } else {
-      setByPath(player, path, delta); // booleans / direct assignment
+      setByPath(player, path, value); // booleans / direct assignment
     }
   }
 }

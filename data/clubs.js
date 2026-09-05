@@ -1,24 +1,49 @@
-// Placeholder club data. Use fictional names to avoid trademark/licensing
-// issues (e.g. "River FC" instead of a real club name), or let the player
-// name their own clubs in-game.
+// Fictional club names to avoid trademark/licensing issues.
 export default [
   {
-    id: "youth_academy",
-    name: "Youth Academy",
+    id: "academy_north",
+    name: "Estrella del Norte Academy",
     tier: 4,
     country: "ARG",
     reputationRequired: 0,
     wageMultiplier: 0.2,
-    styleBonus: {},
+    styleBonus: { speed: 2 },
+  },
+  {
+    id: "academy_south",
+    name: "Sur Juvenil Academy",
+    tier: 4,
+    country: "ARG",
+    reputationRequired: 0,
+    wageMultiplier: 0.2,
+    styleBonus: { technique: 2 },
+  },
+  {
+    id: "club_second_division",
+    name: "Unión Provincial",
+    tier: 3,
+    country: "ARG",
+    reputationRequired: 8,
+    wageMultiplier: 0.6,
+    styleBonus: { stamina: 2 },
   },
   {
     id: "club_local_first_division",
     name: "Club Atlético Local",
     tier: 2,
     country: "ARG",
-    reputationRequired: 10,
+    reputationRequired: 15,
     wageMultiplier: 1.0,
-    styleBonus: { technique: 2 },
+    styleBonus: { technique: 3 },
+  },
+  {
+    id: "club_continental",
+    name: "Deportivo Continental",
+    tier: 2,
+    country: "ESP",
+    reputationRequired: 20,
+    wageMultiplier: 1.3,
+    styleBonus: { mental: 3 },
   },
   {
     id: "club_top_tier",
@@ -29,5 +54,13 @@ export default [
     wageMultiplier: 1.5,
     styleBonus: { attack: 5 },
   },
+  {
+    id: "club_elite",
+    name: "Real Metropolitano",
+    tier: 1,
+    country: "ESP",
+    reputationRequired: 45,
+    wageMultiplier: 2.0,
+    styleBonus: { attack: 3, technique: 3 },
+  },
 ];
- 

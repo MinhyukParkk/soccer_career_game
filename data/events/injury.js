@@ -1,4 +1,3 @@
-
 export default [
   {
     id: "evt_injury_minor",
@@ -28,5 +27,35 @@ export default [
       },
     ],
   },
+  {
+    id: "evt_injury_severe",
+    type: "random",
+    category: "injury",
+    minAge: 20,
+    maxAge: 35,
+    weight: 4,
+    conditions: { excludesFlag: "hasRetiredEarly" },
+    text: "A hard tackle leaves you with a serious knee injury. Surgery is recommended.",
+    choices: [
+      {
+        id: "surgery_full_recovery",
+        label: "Have surgery and rehab properly",
+        effects: {
+          "condition.fitness": -20,
+          "stats.speed": -3,
+          delayTurns: 1,
+        },
+        resultText: "The surgery went well, but you lost real time and a step of pace.",
+      },
+      {
+        id: "conservative_treatment",
+        label: "Try conservative treatment instead",
+        effects: {
+          "condition.fitness": -10,
+          "condition.injuryRiskModifier": 20,
+        },
+        resultText: "You avoided surgery, but the knee remains a long-term risk.",
+      },
+    ],
+  },
 ];
- 
