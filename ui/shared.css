@@ -1,0 +1,169 @@
+/* ============================================================
+   Club Carrera — shared.css
+   Common tokens + site chrome (nav/footer) + reusable components
+   used across every page (character-creation, game, summary...).
+   Page-specific layout (jersey, pitch, timeline, event cards) stays
+   in each page's own <style> block.
+   ============================================================ */
+
+:root {
+  --paper: #e8e1d0;
+  --paper-dark: #ddd4bd;
+  --ink: #23241f;
+  --ink-dim: #5b5847;
+  --ink-faint: #8a8470;
+  --red: #8b2a2a;
+  --red-dim: #b45b5b;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper);
+  font-family: 'PT Serif', serif;
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ===== Site nav ===== */
+.site-nav {
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  height: 64px;
+}
+.site-nav .logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.site-nav .logo .mark { color: var(--red); }
+.site-nav .links { display: flex; gap: 34px; font-size: 14px; }
+.site-nav .links a { color: var(--paper-dark); text-decoration: none; letter-spacing: 0.02em; }
+.site-nav .links a.current { color: var(--paper); border-bottom: 2px solid var(--red); padding-bottom: 4px; }
+.site-nav .auth { display: flex; gap: 12px; align-items: center; }
+.site-nav .auth a { color: var(--paper-dark); font-size: 13.5px; text-decoration: none; }
+.site-nav .auth .signup {
+  border: 1.5px solid var(--paper);
+  color: var(--paper);
+  padding: 8px 16px;
+  font-size: 13.5px;
+  border-radius: 3px;
+}
+
+/* ===== Breadcrumb strip ===== */
+.subnav {
+  background: var(--paper-dark);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 10px 40px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ===== Page container ===== */
+.page {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ===== Header row (title + status stamp) ===== */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 3px solid var(--ink);
+  padding: 34px 0 18px;
+}
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 56px;
+  letter-spacing: 0.02em;
+  margin: 6px 0 0;
+  line-height: 1;
+}
+.kicker { font-size: 12px; letter-spacing: 0.14em; color: var(--ink-dim); text-transform: uppercase; }
+.stamp {
+  border: 2px solid var(--red);
+  color: var(--red);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  padding: 7px 16px;
+  transform: rotate(-6deg);
+  white-space: nowrap;
+}
+
+/* ===== Section titles / labels (reused in every column/card) ===== */
+.col-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.col-title .num { color: var(--red); font-size: 16px; }
+.sub-label { font-size: 11px; letter-spacing: 0.1em; color: var(--ink-faint); text-transform: uppercase; margin-bottom: 10px; }
+
+/* ===== Generic form controls ===== */
+label.field-label {
+  font-size: 11px; letter-spacing: 0.08em; color: var(--ink-faint);
+  text-transform: uppercase; display: block; margin-bottom: 6px;
+}
+input[type="text"], select {
+  width: 100%; background: var(--paper); border: none; border-bottom: 2px solid var(--ink);
+  color: var(--ink); padding: 8px 2px; font-family: 'PT Serif', serif; font-size: 16px;
+}
+input[type="text"]:focus, select:focus { outline: none; border-bottom-color: var(--red); }
+
+/* ===== Generic pill/toggle button (used for foot picker, event choices, filters, etc.) ===== */
+.toggle-btn {
+  border: 1.5px solid var(--ink); color: var(--ink-dim); padding: 10px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.05em;
+  text-align: center; cursor: pointer;
+}
+.toggle-btn.active { background: var(--ink); color: var(--paper); }
+
+/* ===== Generic action buttons ===== */
+.back-btn {
+  border: 1.5px solid var(--ink); background: transparent; color: var(--ink);
+  font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.05em;
+  padding: 12px 26px; cursor: pointer;
+}
+.kickoff-btn {
+  background: var(--red); color: var(--paper); border: none;
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.05em;
+  padding: 12px 34px; cursor: pointer;
+}
+.kickoff-btn:hover { background: var(--red-dim); }
+
+/* ===== Site footer ===== */
+.site-footer {
+  background: var(--ink);
+  color: var(--paper-dark);
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 40px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ===== Shared responsive rule ===== */
+@media (max-width: 1000px) {
+  .site-nav .links { display: none; }
+}
