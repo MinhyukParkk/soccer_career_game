@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Club Carrera — Career</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Page-specific layout for the main game screen only.
+     Shared tokens, nav, footer, buttons, and section titles live in shared.css. */
+
+  .game-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 30px;
+    padding: 30px 0 50px;
+    align-items: start;
+  }
+  .left-col { display: flex; flex-direction: column; gap: 24px; }
+
+  /* --- Player card --- */
+  .player-card { border: 1.5px solid var(--ink); padding: 22px; }
+  .player-card-top { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
+  .ovr-badge {
+    background: var(--red); color: var(--paper);
+    font-family: 'Bebas Neue', sans-serif; font-size: 30px;
+    width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .player-name-block .name { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.02em; }
+  .player-name-block .sub { font-size: 12.5px; color: var(--ink-dim); }
+  .player-meta-row {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    border-top: 1px dotted var(--ink-faint); border-bottom: 1px dotted var(--ink-faint);
+    padding: 12px 0; margin-bottom: 14px;
+  }
+  .player-meta-row div { text-align: center; }
+  .player-meta-row .val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
+  .player-meta-row .lab { font-size: 10.5px; letter-spacing: 0.08em; color: var(--ink-faint); text-transform: uppercase; }
+
+  .trophy-box {
+    text-align: center; padding: 14px 0 4px;
+    font-size: 12px; color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* --- Event / decision panel --- */
+  .event-panel { border: 1.5px solid var(--ink); padding: 24px; min-height: 220px; }
+  .event-eyebrow { font-size: 11px; letter-spacing: 0.12em; color: var(--red); text-transform: uppercase; margin-bottom: 8px; }
+  .event-headline { font-family: 'PT Serif', serif; font-size: 19px; line-height: 1.4; margin: 0 0 20px; }
+  .event-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .event-choice {
+    border: 1.5px solid var(--ink); padding: 16px; cursor: pointer; background: var(--paper);
+  }
+  .event-choice:hover { background: var(--paper-dark); }
+  .event-choice .choice-label { font-family: 'Bebas Neue', sans-serif; font-size: 16px; margin-bottom: 10px; }
+  .choice-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .choice-tag {
+    font-size: 11px; border: 1px solid var(--ink-faint); padding: 3px 8px; color: var(--ink-dim);
+  }
+  .choice-tag.positive { border-color: var(--red); color: var(--red); }
+
+  /* --- Timeline --- */
+  .timeline-panel { border: 1.5px solid var(--ink); padding: 0; max-height: 640px; overflow-y: auto; }
+  table.timeline-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.timeline-table thead th {
+    position: sticky; top: 0; background: var(--paper-dark);
+    text-align: left; font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.06em;
+    padding: 10px 14px; border-bottom: 1.5px solid var(--ink);
+  }
+  table.timeline-table td { padding: 9px 14px; border-bottom: 1px dotted var(--ink-faint); }
+  table.timeline-table tr.current-row td { background: var(--paper-dark); font-weight: 700; }
+  table.timeline-table td.age-cell { font-family: 'Bebas Neue', sans-serif; }
+
+  @media (max-width: 1000px) {
+    .game-grid { grid-template-columns: 1fr; }
+    .event-choices { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="logo"><span class="mark">⬢</span> CLUB CARRERA</div>
+    <div class="links">
+      <a href="#" class="current">Career</a>
+      <a href="#">Leaderboards</a>
+      <a href="#">How It Works</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="auth">
+      <a href="#">Log in</a>
+      <a href="#" class="signup">Sign up</a>
+    </div>
+  </nav>
+
+  <div class="subnav">
+    <span>Career Sim / In Progress</span>
+    <span id="seasonLabel">Season —</span>
+  </div>
+
+  <div class="page">
+    <div class="game-grid">
+
+      <div class="left-col">
+        <div class="player-card" id="playerCard"><!-- rendered by JS --></div>
+        <div class="event-panel" id="eventPanel">
+          <div class="event-eyebrow">Loading</div>
+          <div class="event-headline">Setting up your career…</div>
+        </div>
+      </div>
+
+      <div class="timeline-panel">
+        <table class="timeline-table">
+          <thead>
+            <tr><th>Age</th><th>Club</th><th>Fitness</th><th>Value</th><th>Note</th></tr>
+          </thead>
+          <tbody id="timelineBody"><!-- rows added by JS --></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="site-footer">
+    <span>Club Carrera · Sim Engine 0.1</span>
+    <span>Runs In Your Browser</span>
+  </div>
+
+<script type="module">
+  import { createPlayer } from "../engine/player.js";
+  import { runTurn, checkRetirement } from "../engine/turn.js";
+  import clubs from "../data/clubs.js";
+
+  // --- Load the player created on the identity screen, or fall back to a
+  // demo player so this page still works if opened directly during dev. ---
+  function loadPlayer() {
+    const saved = sessionStorage.getItem("clubCarreraPlayer");
+    if (saved) return JSON.parse(saved);
+    console.warn("No player found in sessionStorage — using a demo player.");
+    return createPlayer({
+      lastName: "Park", number: "10", preferredFoot: "right",
+      country: "Spain", position: "ST",
+    });
+  }
+
+  const player = loadPlayer();
+
+  const playerCardEl = document.getElementById("playerCard");
+  const eventPanelEl = document.getElementById("eventPanel");
+  const timelineBodyEl = document.getElementById("timelineBody");
+  const seasonLabelEl = document.getElementById("seasonLabel");
+
+  function computeOverall(p) {
+    const s = p.stats;
+    return Math.round((s.attack + s.defense + s.speed + s.stamina + s.technique + s.mental) / 6);
+  }
+
+  function clubName(id) {
+    const club = clubs.find((c) => c.id === id);
+    return club ? club.name : id;
+  }
+
+  function renderPlayerCard() {
+    const club = clubs.find((c) => c.id === player.career.currentClub);
+    playerCardEl.innerHTML = `
+      <div class="player-card-top">
+        <div class="ovr-badge">${computeOverall(player)}</div>
+        <div class="player-name-block">
+          <div class="name">${player.identity.lastName.toUpperCase()} · #${player.identity.number}</div>
+          <div class="sub">${player.identity.position} · ${club ? club.name : player.career.currentClub} · Age ${player.age}</div>
+        </div>
+      </div>
+      <div class="player-meta-row">
+        <div><div class="val">${player.condition.fitness}</div><div class="lab">Fitness</div></div>
+        <div><div class="val">${player.reputation.fanFame}</div><div class="lab">Fame</div></div>
+        <div><div class="val">€${player.reputation.marketValue}K</div><div class="lab">Value</div></div>
+      </div>
+      <div class="trophy-box">${
+        player.careerLog.collectiveTitles.length
+          ? player.careerLog.collectiveTitles.join(" · ")
+          : "Empty Trophy Case"
+      }</div>
+    `;
+    seasonLabelEl.textContent = `Age ${player.age}`;
+  }
+
+  // Turns an effects object like { "stats.attack": 4, "condition.morale": -2 }
+  // into short display tags like "+4 ATT" — this is the "preview the outcome
+  // before choosing" mechanic borrowed from Copero.
+  const TAG_LABELS = {
+    "stats.attack": "ATT", "stats.defense": "DEF", "stats.speed": "SPD",
+    "stats.stamina": "STA", "stats.technique": "TEC", "stats.mental": "MEN",
+    "condition.fitness": "FIT", "condition.morale": "MOR",
+    "condition.injuryRiskModifier": "RISK",
+    "reputation.fanFame": "FAME", "reputation.marketValue": "VALUE",
+    "career.internationalCaps": "CAPS",
+  };
+  function formatEffectTags(effects) {
+    const tags = [];
+    for (const [path, value] of Object.entries(effects)) {
+      if (path === "delayTurns" || path.startsWith("push:")) continue;
+      const label = TAG_LABELS[path];
+      if (!label || typeof value !== "number") continue;
+      tags.push({ text: `${value > 0 ? "+" : ""}${value} ${label}`, positive: value > 0 });
+    }
+    return tags;
+  }
+
+  // Renders the event card and returns a Promise that resolves with the
+  // chosen option once the player clicks one — this is passed to runTurn()
+  // as chooseFn, exactly like promptChoose() does for the CLI version.
+  function domChoose(eventView) {
+    return new Promise((resolve) => {
+      const choicesHtml = eventView.choices
+        .map((choice, i) => {
+          const tags = formatEffectTags(choice.effects);
+          const tagsHtml = tags
+            .map((t) => `<span class="choice-tag${t.positive ? " positive" : ""}">${t.text}</span>`)
+            .join("");
+          return `
+            <div class="event-choice" data-index="${i}">
+              <div class="choice-label">${choice.label}</div>
+              <div class="choice-tags">${tagsHtml}</div>
+            </div>`;
+        })
+        .join("");
+
+      eventPanelEl.innerHTML = `
+        <div class="event-eyebrow">Career Decision</div>
+        <div class="event-headline">${eventView.text}</div>
+        <div class="event-choices">${choicesHtml}</div>
+      `;
+
+      eventPanelEl.querySelectorAll(".event-choice").forEach((el) => {
+        el.addEventListener(
+          "click",
+          () => resolve(eventView.choices[Number(el.dataset.index)]),
+          { once: true }
+        );
+      });
+    });
+  }
+
+  function addTimelineRow(note, isQuiet = false) {
+    const club = clubs.find((c) => c.id === player.career.currentClub);
+    const row = document.createElement("tr");
+    row.className = "current-row";
+    row.innerHTML = `
+      <td class="age-cell">${player.age}</td>
+      <td>${club ? club.name : player.career.currentClub}</td>
+      <td>${player.condition.fitness}</td>
+      <td>€${player.reputation.marketValue}K</td>
+      <td>${isQuiet ? "<em>Quiet season</em>" : note}</td>
+    `;
+    document.querySelectorAll("#timelineBody tr.current-row").forEach((r) => r.classList.remove("current-row"));
+    timelineBodyEl.appendChild(row);
+    timelineBodyEl.parentElement.parentElement.scrollTop = timelineBodyEl.parentElement.parentElement.scrollHeight;
+  }
+
+  async function playLoop() {
+    renderPlayerCard();
+
+    while (!checkRetirement(player)) {
+      const result = await runTurn(player, 2, domChoose);
+      renderPlayerCard();
+
+      if (result) {
+        addTimelineRow(result.resultText);
+      } else {
+        addTimelineRow(null, true);
+        eventPanelEl.innerHTML = `
+          <div class="event-eyebrow">Career Decision</div>
+          <div class="event-headline">Nothing major happened this season. Training continues quietly.</div>
+        `;
+        await new Promise((r) => setTimeout(r, 500));
+      }
+    }
+
+    sessionStorage.setItem("clubCarreraPlayer", JSON.stringify(player));
+    window.location.href = "summary.html";
+  }
+
+  playLoop();
+</script>
+
+</body>
+</html>

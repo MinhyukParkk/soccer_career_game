@@ -240,7 +240,9 @@
     <span>Runs In Your Browser</span>
   </div>
 
-<script>
+<script type="module">
+  import { createPlayer } from "../engine/player.js";
+
   const state = {
     lastName: "Park", number: "10", foot: "right",
     country: "Spain", countryFlag: "🇪🇸", position: "ST", pace: "normal",
@@ -304,13 +306,25 @@
     console.log("Back pressed — would return to previous screen.");
   });
 
+  // This is the real engine hookup: Kick Off now builds an actual player
+  // object via createPlayer() instead of just showing the raw form state.
   document.getElementById("playBtn").addEventListener("click", () => {
-    console.log("Starting career with:", state);
-    alert(
-      `Career starting:\n${state.lastName} #${state.number}\n` +
-      `Foot: ${state.foot}\nCountry: ${state.countryFlag} ${state.country}\n` +
-      `Position: ${state.position}\nPace: ${state.pace}`
-    );
+    const player = createPlayer({
+      lastName: state.lastName || "Player",
+      number: state.number,
+      preferredFoot: state.foot,
+      country: state.country,
+      position: state.position,
+    });
+    player.meta = { pace: state.pace, countryFlag: state.countryFlag };
+
+    // Hand the player off to the next screen. sessionStorage survives a
+    // page navigation within the same tab, which is exactly what we need
+    // here (game.html doesn't exist yet — this is wired ahead of it).
+    sessionStorage.setItem("clubCarreraPlayer", JSON.stringify(player));
+
+    console.log("Player created:", player);
+    window.location.href = "game.html";
   });
 </script>
 

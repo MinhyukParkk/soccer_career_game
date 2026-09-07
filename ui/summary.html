@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Club Carrera — Career Complete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Page-specific layout for the career summary / archive screen only. */
+
+  .hero {
+    text-align: center;
+    padding: 40px 0 30px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .hero .eyebrow { font-size: 12px; letter-spacing: 0.14em; color: var(--ink-dim); text-transform: uppercase; }
+  .hero h1 { font-size: 60px; margin: 6px 0 0; }
+  .hero .legacy-stamp {
+    display: inline-block; margin-top: 14px;
+    border: 2px solid var(--red); color: var(--red);
+    font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.08em;
+    padding: 8px 20px; text-transform: uppercase;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    padding: 34px 0;
+  }
+  .stat-card { border: 1.5px solid var(--ink); padding: 20px; text-align: center; }
+  .stat-card .num { font-family: 'Bebas Neue', sans-serif; font-size: 40px; }
+  .stat-card .lab { font-size: 11px; letter-spacing: 0.08em; color: var(--ink-faint); text-transform: uppercase; margin-top: 4px; }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 8px;
+    margin: 30px 0 18px;
+  }
+
+  .club-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .club-card { border: 1.5px solid var(--ink); padding: 16px; }
+  .club-card .club-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; margin-bottom: 4px; }
+  .club-card .club-meta { font-size: 12px; color: var(--ink-dim); }
+
+  .note-box {
+    font-size: 12.5px; color: var(--ink-dim); font-style: italic;
+    border-top: 1px dotted var(--ink-faint); padding-top: 12px; margin-top: 14px;
+  }
+
+  .trophy-cabinet {
+    border: 1.5px solid var(--ink);
+    padding: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .footer-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    padding: 30px 0 50px;
+  }
+</style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="logo"><span class="mark">⬢</span> CLUB CARRERA</div>
+    <div class="links">
+      <a href="#" class="current">Career</a>
+      <a href="#">Leaderboards</a>
+      <a href="#">How It Works</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="auth">
+      <a href="#">Log in</a>
+      <a href="#" class="signup">Sign up</a>
+    </div>
+  </nav>
+
+  <div class="subnav">
+    <span>Career Sim / Retired</span>
+    <span id="finalAgeLabel">Age —</span>
+  </div>
+
+  <div class="page">
+
+    <div class="hero">
+      <div class="eyebrow">Career Complete</div>
+      <h1 id="heroName">PLAYER</h1>
+      <div class="legacy-stamp" id="legacyStamp">—</div>
+    </div>
+
+    <div class="summary-grid" id="statGrid"><!-- rendered by JS --></div>
+
+    <div class="section-title">Clubs Represented</div>
+    <div class="club-list" id="clubList"><!-- rendered by JS --></div>
+    <div class="note-box">
+      Match-by-match apps, goals, and assists per club arrive once the season
+      simulation engine is built — for now this lists every club on the
+      player's journey in order.
+    </div>
+
+    <div class="section-title">Honours Cabinet</div>
+    <div class="trophy-cabinet" id="trophyCabinet">Empty Trophy Case</div>
+
+    <div class="footer-actions">
+      <button class="back-btn" id="playAgainBtn">Play Again</button>
+    </div>
+
+  </div>
+
+  <div class="site-footer">
+    <span>Club Carrera · Sim Engine 0.1</span>
+    <span>Runs In Your Browser</span>
+  </div>
+
+<script type="module">
+  import { generateSummary } from "../engine/summary.js";
+  import clubs from "../data/clubs.js";
+
+  const saved = sessionStorage.getItem("clubCarreraPlayer");
+  if (!saved) {
+    console.warn("No player found — redirecting to character creation.");
+    window.location.href = "character-creation.html";
+  }
+  const player = JSON.parse(saved);
+  const summary = generateSummary(player);
+
+  function clubInfo(id) {
+    return clubs.find((c) => c.id === id) || { name: id, tier: "?", country: "?" };
+  }
+
+  document.getElementById("heroName").textContent =
+    `${player.identity.lastName.toUpperCase()} · #${player.identity.number}`;
+  document.getElementById("finalAgeLabel").textContent = `Retired at Age ${player.age}`;
+  document.getElementById("legacyStamp").textContent = summary.legacyTier;
+
+  document.getElementById("statGrid").innerHTML = `
+    <div class="stat-card"><div class="num">${summary.totalMatches}</div><div class="lab">Matches</div></div>
+    <div class="stat-card"><div class="num">${summary.totalGoals}</div><div class="lab">Goals</div></div>
+    <div class="stat-card"><div class="num">${summary.totalAssists}</div><div class="lab">Assists</div></div>
+    <div class="stat-card"><div class="num">${summary.internationalCaps}</div><div class="lab">Int'l Caps</div></div>
+    <div class="stat-card"><div class="num">€${player.reputation.marketValue}K</div><div class="lab">Peak Value</div></div>
+    <div class="stat-card"><div class="num">${summary.clubsPlayedFor.length + 1}</div><div class="lab">Clubs</div></div>
+  `;
+
+  // Every club on the journey, in order: past clubs from clubHistory, then
+  // the club the player retired at (currentClub).
+  const journey = [...summary.clubsPlayedFor, player.career.currentClub];
+  document.getElementById("clubList").innerHTML = journey
+    .map((id) => {
+      const club = clubInfo(id);
+      return `
+        <div class="club-card">
+          <div class="club-name">${club.name}</div>
+          <div class="club-meta">Tier ${club.tier} · ${club.country}</div>
+        </div>`;
+    })
+    .join("");
+
+  const trophies = [...summary.collectiveTitles, ...summary.individualAwards];
+  document.getElementById("trophyCabinet").textContent = trophies.length
+    ? trophies.join(" · ")
+    : "Empty Trophy Case";
+
+  document.getElementById("playAgainBtn").addEventListener("click", () => {
+    sessionStorage.removeItem("clubCarreraPlayer");
+    window.location.href = "character-creation.html";
+  });
+</script>
+
+</body>
+</html>
