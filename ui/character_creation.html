@@ -41,19 +41,38 @@
   .hint-box b { color: var(--red); display: block; font-style: normal; margin-bottom: 2px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em; font-size: 14px; }
 
   /* --- Position --- */
-  .pitch { position: relative; background: var(--paper-dark); height: 360px; border: 1.5px solid var(--ink); }
-  .pitch::before { content: ""; position: absolute; inset: 12px; border: 1px solid var(--ink-faint); }
+  .pitch {
+    position: relative;
+    background: #c9c7a0; /* muted olive-green, evokes a pitch while staying in the paper palette */
+    height: 460px;
+    border: 1.5px solid var(--ink);
+  }
+  .pitch::before { content: ""; position: absolute; inset: 12px; border: 1px solid rgba(35,36,31,0.25); }
   .pitch::after {
-    content: ""; position: absolute; left: 50%; top: 50%;
-    width: 66px; height: 66px; border: 1px solid var(--ink-faint); border-radius: 50%;
+    content: ""; position: absolute; left: 50%; top: 62%;
+    width: 70px; height: 70px; border: 1px solid rgba(35,36,31,0.25); border-radius: 50%;
     transform: translate(-50%,-50%);
   }
   .pos-dot {
-    position: absolute; width: 42px; height: 42px; background: var(--paper); border: 1.5px solid var(--ink);
-    color: var(--ink-dim); border-radius: 50%; font-family: 'Bebas Neue', sans-serif; font-size: 12px;
-    display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translate(-50%,-50%);
+    position: absolute; width: 36px; height: 36px;
+    background: var(--paper); border: 2px solid var(--dot-color, var(--ink));
+    color: var(--dot-color, var(--ink-dim));
+    border-radius: 50%; font-family: 'Bebas Neue', sans-serif; font-size: 10px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transform: translate(-50%,-50%);
+    transition: background 0.12s, color 0.12s;
   }
-  .pos-dot.active { background: var(--red); color: var(--paper); border-color: var(--red); }
+  .pos-dot:hover { background: var(--paper-dark); }
+  .pos-dot.active { background: var(--dot-color, var(--ink)); color: var(--paper); }
+
+  .pos-dot[data-role="attack"] { --dot-color: var(--red); }
+  .pos-dot[data-role="midfield"] { --dot-color: #a9822c; }
+  .pos-dot[data-role="defense"] { --dot-color: #33586b; }
+  .pos-dot[data-role="gk"] { --dot-color: var(--ink); }
+
+  .pitch-legend { display: flex; gap: 16px; margin-top: 10px; font-size: 11px; color: var(--ink-dim); }
+  .pitch-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .pitch-legend .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
   /* --- Career pace + footer row (specific to this page) --- */
   .bottombar {
@@ -194,16 +213,29 @@
         <div class="sub-label">Tap the Pitch</div>
 
         <div class="pitch" id="pitch">
-          <div class="pos-dot" style="left:22%; top:26%;" data-pos="LW">LW</div>
-          <div class="pos-dot active" style="left:50%; top:20%;" data-pos="ST">ST</div>
-          <div class="pos-dot" style="left:78%; top:26%;" data-pos="RW">RW</div>
-          <div class="pos-dot" style="left:50%; top:40%;" data-pos="CAM">CAM</div>
-          <div class="pos-dot" style="left:50%; top:54%;" data-pos="CM">CM</div>
-          <div class="pos-dot" style="left:50%; top:66%;" data-pos="CDM">CDM</div>
-          <div class="pos-dot" style="left:15%; top:70%;" data-pos="LB">LB</div>
-          <div class="pos-dot" style="left:85%; top:70%;" data-pos="RB">RB</div>
-          <div class="pos-dot" style="left:50%; top:80%;" data-pos="CB">CB</div>
-          <div class="pos-dot" style="left:50%; top:92%;" data-pos="GK">GK</div>
+          <div class="pos-dot active" data-role="attack" data-pos="CF" style="left:50%; top:8%;">CF</div>
+          <div class="pos-dot" data-role="attack" data-pos="WF" style="left:28%; top:17%;">WF</div>
+
+          <div class="pos-dot" data-role="midfield" data-pos="LW" style="left:14%; top:27%;">LW</div>
+          <div class="pos-dot" data-role="midfield" data-pos="RW" style="left:86%; top:27%;">RW</div>
+          <div class="pos-dot" data-role="midfield" data-pos="AM" style="left:50%; top:30%;">AM</div>
+          <div class="pos-dot" data-role="midfield" data-pos="CM" style="left:50%; top:44%;">CM</div>
+          <div class="pos-dot" data-role="midfield" data-pos="DM" style="left:50%; top:58%;">DM</div>
+
+          <div class="pos-dot" data-role="defense" data-pos="LWB" style="left:26%; top:50%;">LWB</div>
+          <div class="pos-dot" data-role="defense" data-pos="RWB" style="left:74%; top:50%;">RWB</div>
+          <div class="pos-dot" data-role="defense" data-pos="LB" style="left:12%; top:66%;">LB</div>
+          <div class="pos-dot" data-role="defense" data-pos="RB" style="left:88%; top:66%;">RB</div>
+          <div class="pos-dot" data-role="defense" data-pos="CB" style="left:50%; top:74%;">CB</div>
+          <div class="pos-dot" data-role="defense" data-pos="SW" style="left:50%; top:87%;">SW</div>
+
+          <div class="pos-dot" data-role="gk" data-pos="GK" style="left:50%; top:97%;">GK</div>
+        </div>
+        <div class="pitch-legend">
+          <span><span class="dot" style="background:var(--red);"></span>Attack</span>
+          <span><span class="dot" style="background:#a9822c;"></span>Midfield</span>
+          <span><span class="dot" style="background:#33586b;"></span>Defense</span>
+          <span><span class="dot" style="background:var(--ink);"></span>Goalkeeper</span>
         </div>
       </div>
 
@@ -245,7 +277,7 @@
 
   const state = {
     lastName: "Park", number: "10", foot: "right",
-    country: "Spain", countryFlag: "🇪🇸", position: "ST", pace: "normal",
+    country: "Spain", countryFlag: "🇪🇸", position: "CF", pace: "normal",
   };
 
   const jerseyName = document.getElementById("jerseyName");
@@ -324,7 +356,7 @@
     sessionStorage.setItem("clubCarreraPlayer", JSON.stringify(player));
 
     console.log("Player created:", player);
-    window.location.href = "game.html";
+    window.location.href = "/ui/game.html";
   });
 </script>
 

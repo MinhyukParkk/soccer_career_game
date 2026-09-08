@@ -151,9 +151,36 @@
   const timelineBodyEl = document.getElementById("timelineBody");
   const seasonLabelEl = document.getElementById("seasonLabel");
 
+  // Overall rating is weighted by role: attackers lean on attack/speed,
+  // midfielders on technique/mental/stamina, defenders on defense/mental,
+  // and the goalkeeper almost entirely on defense/mental — instead of a
+  // flat average of all six stats regardless of position.
+  const POSITION_GROUPS = {
+    attack: ["CF", "WF"],
+    midfield: ["AM", "CM", "DM", "LW", "RW"],
+    defense: ["SW", "CB", "LB", "RB", "LWB", "RWB"],
+    gk: ["GK"],
+  };
+  const OVERALL_WEIGHTS = {
+    attack:   { attack: 0.40, speed: 0.25, technique: 0.20, mental: 0.10, stamina: 0.05, defense: 0 },
+    midfield: { technique: 0.30, mental: 0.25, stamina: 0.20, attack: 0.15, defense: 0.10, speed: 0 },
+    defense:  { defense: 0.45, mental: 0.20, stamina: 0.15, speed: 0.15, technique: 0.05, attack: 0 },
+    gk:       { defense: 0.50, mental: 0.30, stamina: 0.20, attack: 0, speed: 0, technique: 0 },
+  };
+  function positionGroup(position) {
+    for (const [group, positions] of Object.entries(POSITION_GROUPS)) {
+      if (positions.includes(position)) return group;
+    }
+    return "midfield"; // fallback for any unrecognized position value
+  }
   function computeOverall(p) {
-    const s = p.stats;
-    return Math.round((s.attack + s.defense + s.speed + s.stamina + s.technique + s.mental) / 6);
+    const group = positionGroup(p.identity.position);
+    const weights = OVERALL_WEIGHTS[group];
+    const total = Object.entries(weights).reduce(
+      (sum, [stat, w]) => sum + p.stats[stat] * w,
+      0
+    );
+    return Math.round(total);
   }
 
   function clubName(id) {
@@ -261,8 +288,11 @@
   async function playLoop() {
     renderPlayerCard();
 
+    const PACE_TO_TURN_LENGTH = { intense: 1, normal: 2, express: 3 };
+    const turnLength = PACE_TO_TURN_LENGTH[player.meta?.pace] ?? 2;
+
     while (!checkRetirement(player)) {
-      const result = await runTurn(player, 2, domChoose);
+      const result = await runTurn(player, turnLength, domChoose);
       renderPlayerCard();
 
       if (result) {
@@ -278,7 +308,7 @@
     }
 
     sessionStorage.setItem("clubCarreraPlayer", JSON.stringify(player));
-    window.location.href = "summary.html";
+    window.location.href = "/ui/summary.html";
   }
 
   playLoop();
