@@ -66,3 +66,25 @@ export function applyEffects(effects, player) {
     }
   }
 }
+
+// Some choices are risky: instead of one fixed set of effects, they define
+// `outcomes`, a list of { probability, label, positive, effects, resultText }.
+// This rolls which outcome actually happens. Plain choices (just `effects` +
+// `resultText`, no `outcomes`) are returned unchanged for backward compatibility.
+export function resolveChoiceOutcome(choice) {
+  if (!choice.outcomes) {
+    return { effects: choice.effects, resultText: choice.resultText };
+  }
+  const roll = Math.random();
+  let cumulative = 0;
+  for (const outcome of choice.outcomes) {
+    cumulative += outcome.probability;
+    if (roll <= cumulative) {
+      return { effects: outcome.effects, resultText: outcome.resultText };
+    }
+  }
+  // Floating point safety net — probabilities should sum to 1, but if they
+  // don't quite, fall back to the last outcome rather than returning nothing.
+  const last = choice.outcomes[choice.outcomes.length - 1];
+  return { effects: last.effects, resultText: last.resultText };
+}

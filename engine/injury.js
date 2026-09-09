@@ -18,12 +18,26 @@ export default [
       {
         id: "push_through",
         label: "Push through and return early",
-        effects: {
-          "condition.fitness": -5,
-          "condition.injuryRiskModifier": 15,
-          "stats.speed": -2,
-        },
-        resultText: "You returned fast, but your injury risk is now higher.",
+        outcomes: [
+          {
+            probability: 0.7,
+            label: "Recovered fine",
+            positive: true,
+            effects: { "condition.fitness": -3 },
+            resultText: "You returned early and it paid off — no lasting damage.",
+          },
+          {
+            probability: 0.3,
+            label: "Setback",
+            positive: false,
+            effects: {
+              "condition.fitness": -12,
+              "condition.injuryRiskModifier": 20,
+              "stats.speed": -3,
+            },
+            resultText: "Returning early backfired — the injury lingered and cost you pace.",
+          },
+        ],
       },
     ],
   },

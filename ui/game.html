@@ -53,7 +53,8 @@
     border: 1.5px solid var(--ink); padding: 16px; cursor: pointer; background: var(--paper);
   }
   .event-choice:hover { background: var(--paper-dark); }
-  .event-choice .choice-label { font-family: 'Bebas Neue', sans-serif; font-size: 16px; margin-bottom: 10px; }
+  .event-choice .choice-label { font-family: 'Bebas Neue', sans-serif; font-size: 16px; margin-bottom: 6px; }
+  .choice-subtext { font-size: 11px; color: var(--ink-faint); margin-bottom: 10px; }
   .choice-tags { display: flex; flex-wrap: wrap; gap: 6px; }
   .choice-tag {
     font-size: 11px; border: 1px solid var(--ink-faint); padding: 3px 8px; color: var(--ink-dim);
@@ -234,6 +235,24 @@
     return tags;
   }
 
+  // For risky choices (choice.outcomes present), show each possible outcome
+  // with its probability instead of a flat stat delta — e.g. "Starter 65%"
+  // in green next to "Injury 35%" in red. This previews the risk before the
+  // player commits, matching Copero's "Train hard" / "Double sessions" cards.
+  function formatOutcomeTags(outcomes) {
+    return outcomes.map((o) => ({
+      text: `${o.label} ${Math.round(o.probability * 100)}%`,
+      positive: o.positive,
+    }));
+  }
+
+  function renderChoiceTags(choice) {
+    const tags = choice.outcomes ? formatOutcomeTags(choice.outcomes) : formatEffectTags(choice.effects);
+    return tags
+      .map((t) => `<span class="choice-tag${t.positive ? " positive" : ""}">${t.text}</span>`)
+      .join("");
+  }
+
   // Renders the event card and returns a Promise that resolves with the
   // chosen option once the player clicks one — this is passed to runTurn()
   // as chooseFn, exactly like promptChoose() does for the CLI version.
@@ -241,14 +260,11 @@
     return new Promise((resolve) => {
       const choicesHtml = eventView.choices
         .map((choice, i) => {
-          const tags = formatEffectTags(choice.effects);
-          const tagsHtml = tags
-            .map((t) => `<span class="choice-tag${t.positive ? " positive" : ""}">${t.text}</span>`)
-            .join("");
           return `
             <div class="event-choice" data-index="${i}">
               <div class="choice-label">${choice.label}</div>
-              <div class="choice-tags">${tagsHtml}</div>
+              ${choice.subtext ? `<div class="choice-subtext">${choice.subtext}</div>` : ""}
+              <div class="choice-tags">${renderChoiceTags(choice)}</div>
             </div>`;
         })
         .join("");

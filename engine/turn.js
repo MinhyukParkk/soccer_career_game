@@ -1,4 +1,4 @@
-import { EVENT_POOL, filterEligibleEvents, weightedRandomPick, applyEffects } from "./events.js";
+import { EVENT_POOL, filterEligibleEvents, weightedRandomPick, applyEffects, resolveChoiceOutcome } from "./events.js";
 import clubs from "../data/clubs.js";
 
 // Placeholder choice picker for demo use. Swap this out for real user
@@ -25,9 +25,13 @@ export async function runTurn(player, turnLength = 2, chooseFn = autoChoose) {
   if (!eventView) return null;
 
   const choice = await chooseFn(eventView, player);
-  applyEffects(choice.effects, player);
 
-  return { event: event.id, choice: choice.id, resultText: choice.resultText };
+  // Risky choices (choice.outcomes present) roll which outcome actually
+  // happens; plain choices just use their fixed effects/resultText.
+  const resolved = resolveChoiceOutcome(choice);
+  applyEffects(resolved.effects, player);
+
+  return { event: event.id, choice: choice.id, resultText: resolved.resultText };
 }
 
 export function checkRetirement(player) {
