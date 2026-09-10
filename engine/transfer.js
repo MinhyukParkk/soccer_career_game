@@ -15,11 +15,22 @@ function pickEligibleClubs(player, clubs, count) {
   return shuffled.slice(0, count);
 }
 
+function crestInitials(name) {
+  return name
+    .split(/[\s-]+/)
+    .filter((w) => w.length > 0)
+    .slice(0, 3)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+}
+
 function clubChoice(target, effects, resultText) {
   return {
     id: `sign_${target.id}`,
     label: `Sign for ${target.name}`,
     subtext: `${target.league} · ${target.country}`,
+    crest: crestInitials(target.name),
     effects,
     resultText,
   };
@@ -36,7 +47,7 @@ export default [
     category: "transfer",
     minAge: 19,
     maxAge: 33,
-    weight: 8,
+    weight: 14,
     conditions: {},
     dynamic: true,
     build(player, clubs) {
@@ -78,7 +89,7 @@ export default [
     category: "transfer",
     minAge: 20,
     maxAge: 34,
-    weight: 4,
+    weight: 6,
     conditions: { minReputationFanFame: 0 },
     dynamic: true,
     build(player, clubs) {
@@ -121,7 +132,7 @@ export default [
     category: "transfer",
     minAge: 18,
     maxAge: 32,
-    weight: 4,
+    weight: 6,
     conditions: {},
     dynamic: true,
     build(player, clubs) {

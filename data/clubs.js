@@ -4,10 +4,6 @@
 // trademarked content — no crests/logos are reproduced here.
 
 export default [
-  // ===== Starting academies (tier 4 — where every career begins) =====
-  { id: "academy_north", name: "Estrella del Norte Academy", league: "Academy", tier: 4, country: "ARG", reputationRequired: 0, wageMultiplier: 0.2, styleBonus: { speed: 2 } },
-  { id: "academy_south", name: "Sur Juvenil Academy", league: "Academy", tier: 4, country: "ARG", reputationRequired: 0, wageMultiplier: 0.2, styleBonus: { technique: 2 } },
-
   // ===== England: Premier League (tier 1) =====
   { id: "eng_mancity", name: "Manchester City", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 45, wageMultiplier: 2.4, styleBonus: { technique: 3 } },
   { id: "eng_liverpool", name: "Liverpool", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 42, wageMultiplier: 2.2, styleBonus: { stamina: 3 } },

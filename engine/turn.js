@@ -30,7 +30,13 @@ export async function runTurn(player, turnLength = 2, chooseFn = autoChoose) {
     // based on things like which clubs are currently within the player's
     // reach. If build() returns null (nothing available right now), this
     // stretch just has no narrative event, same as an empty eligible pool.
-    const eventView = event.dynamic ? event.build(player, clubs) : event;
+    let eventView = null;
+    if (event.dynamic) {
+      const built = event.build(player, clubs);
+      if (built) eventView = { ...built, category: event.category };
+    } else {
+      eventView = event;
+    }
     if (eventView) {
       const choice = await chooseFn(eventView, player);
 

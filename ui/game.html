@@ -53,7 +53,7 @@
   .event-panel { border: 1.5px solid var(--ink); padding: 24px; min-height: 220px; }
   .event-eyebrow { font-size: 11px; letter-spacing: 0.12em; color: var(--red); text-transform: uppercase; margin-bottom: 8px; }
   .event-headline { font-family: 'PT Serif', serif; font-size: 19px; line-height: 1.4; margin: 0 0 20px; }
-  .event-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .event-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
   .event-choice {
     border: 1.5px solid var(--ink); padding: 16px; cursor: pointer; background: var(--paper);
   }
@@ -65,6 +65,22 @@
     font-size: 11px; border: 1px solid var(--ink-faint); padding: 3px 8px; color: var(--ink-dim);
   }
   .choice-tag.positive { border-color: var(--red); color: var(--red); }
+
+  /* Transfer-style choices (signing for a club) get a crest block instead
+     of a stat-delta tag — the club/league is the point, not a number. */
+  .event-choice.transfer-choice { text-align: center; }
+  .crest-block {
+    width: 56px; height: 56px; margin: 0 auto 12px;
+    border: 2px solid var(--red); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--red);
+    background: var(--paper);
+  }
+  .event-choice.transfer-choice .choice-label { margin-bottom: 2px; }
+  .event-choice.transfer-choice .choice-subtext { margin-bottom: 0; }
+
+  /* --- Academy offer step (career start) --- */
+  .offer-intro { font-family: 'PT Serif', serif; font-size: 15px; color: var(--ink-dim); margin-bottom: 18px; }
 
   /* --- Timeline --- */
   .timeline-panel { border: 1.5px solid var(--ink); padding: 0; max-height: 640px; overflow-y: auto; }
@@ -137,6 +153,8 @@
   import { createPlayer } from "../engine/player.js";
   import { runTurn, checkRetirement } from "../engine/turn.js";
   import { getPositionGroup } from "../engine/positions.js";
+  import { applyEffects } from "../engine/events.js";
+  import { getAcademyOffers } from "../engine/academy.js";
   import clubs from "../data/clubs.js";
 
   // --- Load the player created on the identity screen, or fall back to a
@@ -214,37 +232,35 @@
     seasonLabelEl.textContent = `Age ${player.age}`;
   }
 
-  // Turns an effects object like { "stats.attack": 4, "condition.morale": -2 }
-  // into short display tags like "+4 ATT" — this is the "preview the outcome
-  // before choosing" mechanic borrowed from Copero.
-  const TAG_LABELS = {
-    "stats.attack": "ATT", "stats.defense": "DEF", "stats.speed": "SPD",
-    "stats.stamina": "STA", "stats.technique": "TEC", "stats.mental": "MEN",
-    "condition.fitness": "FIT", "condition.morale": "MOR",
-    "condition.injuryRiskModifier": "RISK",
-    "reputation.fanFame": "FAME", "reputation.marketValue": "VALUE",
-    "career.internationalCaps": "CAPS",
-  };
+  // Instead of showing raw stat/fame/risk deltas, we preview the one number
+  // that actually matters to the player: how much their OVR would change.
+  // We do this by applying the effects to a throwaway clone and diffing
+  // computeOverall() before/after — no separate "what does FAME mean" tags.
+  function computeOvrDelta(effects) {
+    const clone = structuredClone(player);
+    applyEffects(effects, clone);
+    return computeOverall(clone) - computeOverall(player);
+  }
+
+  function ovrTagText(delta) {
+    const sign = delta > 0 ? "+" : "";
+    return `${sign}${delta} OVR`;
+  }
+
   function formatEffectTags(effects) {
-    const tags = [];
-    for (const [path, value] of Object.entries(effects)) {
-      if (path === "delayTurns" || path.startsWith("push:")) continue;
-      const label = TAG_LABELS[path];
-      if (!label || typeof value !== "number") continue;
-      tags.push({ text: `${value > 0 ? "+" : ""}${value} ${label}`, positive: value > 0 });
-    }
-    return tags;
+    const delta = computeOvrDelta(effects);
+    return [{ text: ovrTagText(delta), positive: delta > 0 }];
   }
 
   // For risky choices (choice.outcomes present), show each possible outcome
-  // with its probability instead of a flat stat delta — e.g. "Starter 65%"
-  // in green next to "Injury 35%" in red. This previews the risk before the
-  // player commits, matching Copero's "Train hard" / "Double sessions" cards.
+  // as its OVR impact plus probability — e.g. "+3 OVR · 65%" next to
+  // "-5 OVR · 35%" — instead of abstract labels. This previews the real
+  // risk before the player commits.
   function formatOutcomeTags(outcomes) {
-    return outcomes.map((o) => ({
-      text: `${o.label} ${Math.round(o.probability * 100)}%`,
-      positive: o.positive,
-    }));
+    return outcomes.map((o) => {
+      const delta = computeOvrDelta(o.effects);
+      return { text: `${ovrTagText(delta)} · ${Math.round(o.probability * 100)}%`, positive: delta > 0 };
+    });
   }
 
   function renderChoiceTags(choice) {
@@ -259,19 +275,30 @@
   // as chooseFn, exactly like promptChoose() does for the CLI version.
   function domChoose(eventView) {
     return new Promise((resolve) => {
+      const isTransfer = eventView.category === "transfer";
       const choicesHtml = eventView.choices
         .map((choice, i) => {
+          // Club-signing choices (they carry `subtext` = league · country)
+          // get a crest block and skip the OVR tag — the club itself is
+          // the point, not a stat delta.
+          if (choice.subtext) {
+            return `
+              <div class="event-choice transfer-choice" data-index="${i}">
+                <div class="crest-block">${choice.crest || "?"}</div>
+                <div class="choice-label">${choice.label}</div>
+                <div class="choice-subtext">${choice.subtext}</div>
+              </div>`;
+          }
           return `
             <div class="event-choice" data-index="${i}">
               <div class="choice-label">${choice.label}</div>
-              ${choice.subtext ? `<div class="choice-subtext">${choice.subtext}</div>` : ""}
               <div class="choice-tags">${renderChoiceTags(choice)}</div>
             </div>`;
         })
         .join("");
 
       eventPanelEl.innerHTML = `
-        <div class="event-eyebrow">Career Decision</div>
+        <div class="event-eyebrow">${isTransfer ? "Transfer" : "Career Decision"}</div>
         <div class="event-headline">${eventView.text}</div>
         <div class="event-choices">${choicesHtml}</div>
       `;
@@ -303,7 +330,50 @@
     timelineBodyEl.parentElement.parentElement.scrollTop = timelineBodyEl.parentElement.parentElement.scrollHeight;
   }
 
+  // Shown once at career start, before any turns run: three random clubs
+  // offer the player a youth deal. Reuses the same crest-block styling as
+  // in-game transfer choices for visual consistency.
+  function showAcademyOffer() {
+    return new Promise((resolve) => {
+      const offers = getAcademyOffers(clubs, 3);
+      const choicesHtml = offers
+        .map((club, i) => {
+          const initials = club.name
+            .split(/[\s-]+/)
+            .filter((w) => w.length > 0)
+            .slice(0, 3)
+            .map((w) => w[0])
+            .join("")
+            .toUpperCase();
+          return `
+            <div class="event-choice transfer-choice" data-index="${i}">
+              <div class="crest-block">${initials}</div>
+              <div class="choice-label">${club.name}</div>
+              <div class="choice-subtext">${club.league} · ${club.country}</div>
+            </div>`;
+        })
+        .join("");
+
+      eventPanelEl.innerHTML = `
+        <div class="event-eyebrow">Academy Intake</div>
+        <div class="event-headline">Three clubs want to sign you as a youth prospect. Where do you start?</div>
+        <div class="event-choices">${choicesHtml}</div>
+      `;
+
+      eventPanelEl.querySelectorAll(".event-choice").forEach((el) => {
+        el.addEventListener(
+          "click",
+          () => resolve(offers[Number(el.dataset.index)].id),
+          { once: true }
+        );
+      });
+    });
+  }
+
   async function playLoop() {
+    if (!player.career.currentClub) {
+      player.career.currentClub = await showAcademyOffer();
+    }
     renderPlayerCard();
 
     const PACE_TO_TURN_LENGTH = { intense: 1, normal: 2, express: 3 };

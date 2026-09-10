@@ -3,6 +3,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { createPlayer } from "./engine/player.js";
 import { runTurn, checkRetirement } from "./engine/turn.js";
 import { generateSummary } from "./engine/summary.js";
+import { getAcademyOffers } from "./engine/academy.js";
 import clubs from "./data/clubs.js";
 
 const rl = readline.createInterface({ input, output });
@@ -45,11 +46,11 @@ async function promptChoose(eventView, player) {
 }
 
 async function pickStartingClub() {
-  const starterClubs = clubs.filter((c) => c.reputationRequired === 0);
+  const offers = getAcademyOffers(clubs, 3);
   const picked = await chooseFromList(
-    "Which academy are you starting your career at?",
-    starterClubs,
-    (c) => `${c.name} (${c.country})`
+    "Three clubs want to sign you as a youth prospect. Where do you start?",
+    offers,
+    (c) => `${c.name} (${c.league} · ${c.country})`
   );
   return picked.id;
 }

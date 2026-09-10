@@ -3,7 +3,7 @@ export function createPlayer({ lastName, number, preferredFoot, country, positio
     identity: { lastName, number, preferredFoot, country, position },
     age: 17,
     career: {
-      currentClub: "academy_north",
+      currentClub: null, // assigned via the academy-offer step at career start
       clubHistory: [],
       loanHistory: [],
       internationalCaps: 0,
