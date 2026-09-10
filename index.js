@@ -71,11 +71,14 @@ async function playCareer() {
 
   while (!checkRetirement(player)) {
     const result = await runTurn(player, 2, promptChoose);
-    if (result) {
+    if (result.resultText) {
       console.log(`\n>> ${result.resultText}`);
     } else {
       console.log(`\n[Age ${player.age}] Quiet season, no major events.`);
     }
+    console.log(
+      `   This stretch: ${result.season.matches} apps, ${result.season.goals} goals, ${result.season.assists} assists`
+    );
   }
 
   console.log("\n--- Career Summary ---");

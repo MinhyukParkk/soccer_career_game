@@ -43,6 +43,11 @@
     text-align: center; padding: 14px 0 4px;
     font-size: 12px; color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase;
   }
+  .season-box {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--ink-dim); letter-spacing: 0.03em;
+  }
+  .season-box-label { font-family: 'Bebas Neue', sans-serif; font-size: 12px; color: var(--red); letter-spacing: 0.05em; text-transform: uppercase; }
 
   /* --- Event / decision panel --- */
   .event-panel { border: 1.5px solid var(--ink); padding: 24px; min-height: 220px; }
@@ -114,7 +119,7 @@
       <div class="timeline-panel">
         <table class="timeline-table">
           <thead>
-            <tr><th>Age</th><th>Club</th><th>Fitness</th><th>Value</th><th>Note</th></tr>
+            <tr><th>Age</th><th>Club</th><th>APPS</th><th>GLS</th><th>AST</th><th>Note</th></tr>
           </thead>
           <tbody id="timelineBody"><!-- rows added by JS --></tbody>
         </table>
@@ -131,6 +136,7 @@
 <script type="module">
   import { createPlayer } from "../engine/player.js";
   import { runTurn, checkRetirement } from "../engine/turn.js";
+  import { getPositionGroup } from "../engine/positions.js";
   import clubs from "../data/clubs.js";
 
   // --- Load the player created on the identity screen, or fall back to a
@@ -155,27 +161,17 @@
   // Overall rating is weighted by role: attackers lean on attack/speed,
   // midfielders on technique/mental/stamina, defenders on defense/mental,
   // and the goalkeeper almost entirely on defense/mental — instead of a
-  // flat average of all six stats regardless of position.
-  const POSITION_GROUPS = {
-    attack: ["CF", "WF"],
-    midfield: ["AM", "CM", "DM", "LW", "RW"],
-    defense: ["SW", "CB", "LB", "RB", "LWB", "RWB"],
-    gk: ["GK"],
-  };
+  // flat average of all six stats regardless of position. Role grouping
+  // itself comes from engine/positions.js so this always matches the
+  // groups used by the match simulation.
   const OVERALL_WEIGHTS = {
     attack:   { attack: 0.40, speed: 0.25, technique: 0.20, mental: 0.10, stamina: 0.05, defense: 0 },
     midfield: { technique: 0.30, mental: 0.25, stamina: 0.20, attack: 0.15, defense: 0.10, speed: 0 },
     defense:  { defense: 0.45, mental: 0.20, stamina: 0.15, speed: 0.15, technique: 0.05, attack: 0 },
     gk:       { defense: 0.50, mental: 0.30, stamina: 0.20, attack: 0, speed: 0, technique: 0 },
   };
-  function positionGroup(position) {
-    for (const [group, positions] of Object.entries(POSITION_GROUPS)) {
-      if (positions.includes(position)) return group;
-    }
-    return "midfield"; // fallback for any unrecognized position value
-  }
   function computeOverall(p) {
-    const group = positionGroup(p.identity.position);
+    const group = getPositionGroup(p.identity.position);
     const weights = OVERALL_WEIGHTS[group];
     const total = Object.entries(weights).reduce(
       (sum, [stat, w]) => sum + p.stats[stat] * w,
@@ -191,6 +187,7 @@
 
   function renderPlayerCard() {
     const club = clubs.find((c) => c.id === player.career.currentClub);
+    const s = player.seasonLog;
     playerCardEl.innerHTML = `
       <div class="player-card-top">
         <div class="ovr-badge">${computeOverall(player)}</div>
@@ -203,6 +200,10 @@
         <div><div class="val">${player.condition.fitness}</div><div class="lab">Fitness</div></div>
         <div><div class="val">${player.reputation.fanFame}</div><div class="lab">Fame</div></div>
         <div><div class="val">€${player.reputation.marketValue}K</div><div class="lab">Value</div></div>
+      </div>
+      <div class="season-box">
+        <span class="season-box-label">Last Stretch</span>
+        <span>${s.matchesPlayed} APPS</span><span>${s.goals} GLS</span><span>${s.assists} AST</span>
       </div>
       <div class="trophy-box">${
         player.careerLog.collectiveTitles.length
@@ -285,16 +286,17 @@
     });
   }
 
-  function addTimelineRow(note, isQuiet = false) {
+  function addTimelineRow(season, note) {
     const club = clubs.find((c) => c.id === player.career.currentClub);
     const row = document.createElement("tr");
     row.className = "current-row";
     row.innerHTML = `
       <td class="age-cell">${player.age}</td>
       <td>${club ? club.name : player.career.currentClub}</td>
-      <td>${player.condition.fitness}</td>
-      <td>€${player.reputation.marketValue}K</td>
-      <td>${isQuiet ? "<em>Quiet season</em>" : note}</td>
+      <td>${season.matches}</td>
+      <td>${season.goals}</td>
+      <td>${season.assists}</td>
+      <td>${note ? note : "<em>Quiet season</em>"}</td>
     `;
     document.querySelectorAll("#timelineBody tr.current-row").forEach((r) => r.classList.remove("current-row"));
     timelineBodyEl.appendChild(row);
@@ -311,10 +313,10 @@
       const result = await runTurn(player, turnLength, domChoose);
       renderPlayerCard();
 
-      if (result) {
-        addTimelineRow(result.resultText);
+      if (result.resultText) {
+        addTimelineRow(result.season, result.resultText);
       } else {
-        addTimelineRow(null, true);
+        addTimelineRow(result.season, null);
         eventPanelEl.innerHTML = `
           <div class="event-eyebrow">Career Decision</div>
           <div class="event-headline">Nothing major happened this season. Training continues quietly.</div>
@@ -324,7 +326,8 @@
     }
 
     sessionStorage.setItem("clubCarreraPlayer", JSON.stringify(player));
-    window.location.href = "/ui/summary.html";
+    const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
+    window.location.href = dir + "summary.html";
   }
 
   playLoop();

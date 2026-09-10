@@ -44,7 +44,7 @@
   .pitch {
     position: relative;
     background: #c9c7a0; /* muted olive-green, evokes a pitch while staying in the paper palette */
-    height: 460px;
+    height: 420px;
     border: 1.5px solid var(--ink);
   }
   .pitch::before { content: ""; position: absolute; inset: 12px; border: 1px solid rgba(35,36,31,0.25); }
@@ -54,10 +54,10 @@
     transform: translate(-50%,-50%);
   }
   .pos-dot {
-    position: absolute; width: 36px; height: 36px;
+    position: absolute; width: 40px; height: 40px;
     background: var(--paper); border: 2px solid var(--dot-color, var(--ink));
     color: var(--dot-color, var(--ink-dim));
-    border-radius: 50%; font-family: 'Bebas Neue', sans-serif; font-size: 10px;
+    border-radius: 50%; font-family: 'Bebas Neue', sans-serif; font-size: 10.5px;
     display: flex; align-items: center; justify-content: center; cursor: pointer;
     transform: translate(-50%,-50%);
     transition: background 0.12s, color 0.12s;
@@ -213,23 +213,21 @@
         <div class="sub-label">Tap the Pitch</div>
 
         <div class="pitch" id="pitch">
-          <div class="pos-dot active" data-role="attack" data-pos="CF" style="left:50%; top:8%;">CF</div>
-          <div class="pos-dot" data-role="attack" data-pos="WF" style="left:28%; top:17%;">WF</div>
+          <div class="pos-dot active" data-role="attack" data-pos="ST" style="left:50%; top:12%;">ST</div>
 
-          <div class="pos-dot" data-role="midfield" data-pos="LW" style="left:14%; top:27%;">LW</div>
-          <div class="pos-dot" data-role="midfield" data-pos="RW" style="left:86%; top:27%;">RW</div>
-          <div class="pos-dot" data-role="midfield" data-pos="AM" style="left:50%; top:30%;">AM</div>
-          <div class="pos-dot" data-role="midfield" data-pos="CM" style="left:50%; top:44%;">CM</div>
-          <div class="pos-dot" data-role="midfield" data-pos="DM" style="left:50%; top:58%;">DM</div>
+          <div class="pos-dot" data-role="midfield" data-pos="LW" style="left:20%; top:24%;">LW</div>
+          <div class="pos-dot" data-role="midfield" data-pos="RW" style="left:80%; top:24%;">RW</div>
+          <div class="pos-dot" data-role="midfield" data-pos="CAM" style="left:50%; top:32%;">CAM</div>
+          <div class="pos-dot" data-role="midfield" data-pos="LM" style="left:16%; top:50%;">LM</div>
+          <div class="pos-dot" data-role="midfield" data-pos="CM" style="left:50%; top:50%;">CM</div>
+          <div class="pos-dot" data-role="midfield" data-pos="RM" style="left:84%; top:50%;">RM</div>
+          <div class="pos-dot" data-role="midfield" data-pos="CDM" style="left:50%; top:64%;">CDM</div>
 
-          <div class="pos-dot" data-role="defense" data-pos="LWB" style="left:26%; top:50%;">LWB</div>
-          <div class="pos-dot" data-role="defense" data-pos="RWB" style="left:74%; top:50%;">RWB</div>
-          <div class="pos-dot" data-role="defense" data-pos="LB" style="left:12%; top:66%;">LB</div>
-          <div class="pos-dot" data-role="defense" data-pos="RB" style="left:88%; top:66%;">RB</div>
-          <div class="pos-dot" data-role="defense" data-pos="CB" style="left:50%; top:74%;">CB</div>
-          <div class="pos-dot" data-role="defense" data-pos="SW" style="left:50%; top:87%;">SW</div>
+          <div class="pos-dot" data-role="defense" data-pos="LB" style="left:14%; top:78%;">LB</div>
+          <div class="pos-dot" data-role="defense" data-pos="CB" style="left:50%; top:80%;">CB</div>
+          <div class="pos-dot" data-role="defense" data-pos="RB" style="left:86%; top:78%;">RB</div>
 
-          <div class="pos-dot" data-role="gk" data-pos="GK" style="left:50%; top:97%;">GK</div>
+          <div class="pos-dot" data-role="gk" data-pos="GK" style="left:50%; top:95%;">GK</div>
         </div>
         <div class="pitch-legend">
           <span><span class="dot" style="background:var(--red);"></span>Attack</span>
@@ -277,7 +275,7 @@
 
   const state = {
     lastName: "Park", number: "10", foot: "right",
-    country: "Spain", countryFlag: "🇪🇸", position: "CF", pace: "normal",
+    country: "Spain", countryFlag: "🇪🇸", position: "ST", pace: "normal",
   };
 
   const jerseyName = document.getElementById("jerseyName");
@@ -356,7 +354,8 @@
     sessionStorage.setItem("clubCarreraPlayer", JSON.stringify(player));
 
     console.log("Player created:", player);
-    window.location.href = "/ui/game.html";
+    const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
+    window.location.href = dir + "game.html";
   });
 </script>
 
