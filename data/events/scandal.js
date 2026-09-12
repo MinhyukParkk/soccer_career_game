@@ -79,4 +79,42 @@ export default [
       },
     ],
   },
+  {
+    id: "evt_risky_shortcut",
+    type: "random",
+    category: "scandal",
+    minAge: 23,
+    maxAge: 33,
+    weight: 3,
+    conditions: {},
+    text: "A shortcut could put your season at risk. The performance gain is real, but so is the chance of a long suspension.",
+    choices: [
+      {
+        id: "take_risk",
+        label: "Take the risk",
+        outcomes: [
+          {
+            probability: 0.75,
+            label: "Performance boost",
+            positive: true,
+            effects: { "stats.attack": 3, "stats.stamina": 3 },
+            resultText: "The shortcut paid off — you're sharper than ever.",
+          },
+          {
+            probability: 0.25,
+            label: "Suspension",
+            positive: false,
+            effects: { "condition.morale": -15, "condition.fitness": -10, "reputation.fanFame": -8 },
+            resultText: "You were caught and hit with a long suspension.",
+          },
+        ],
+      },
+      {
+        id: "walk_away",
+        label: "Walk away",
+        effects: {},
+        resultText: "You walked away — no gain, no risk.",
+      },
+    ],
+  },
 ];

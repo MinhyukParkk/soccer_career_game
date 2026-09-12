@@ -4,10 +4,10 @@
 // Several narrative wrappers (plain transfer window, fan backlash, losing
 // your spot to a rival) all reuse the same club-picking logic below.
 
-function pickEligibleClubs(player, clubs, count) {
+function pickEligibleClubs(player, clubs, count, margin = 0) {
   const currentClub = player.career.currentClub;
   const eligible = clubs.filter(
-    (c) => c.id !== currentClub && c.reputationRequired <= player.reputation.marketValue
+    (c) => c.id !== currentClub && c.reputationRequired <= player.reputation.marketValue + margin
   );
   // Shuffle then take `count`, so repeated offers don't always show the
   // same clubs in the same order.
@@ -40,6 +40,23 @@ function stayChoice(label, effects, resultText) {
   return { id: "stay", label, effects, resultText };
 }
 
+function loanChoice(target, parentClubId, loanSeasons, returnAge) {
+  return {
+    id: `loan_${target.id}`,
+    label: `Join ${target.name} on loan`,
+    subtext: `${target.league} · ${target.country} · ${loanSeasons}-season loan`,
+    crest: crestInitials(target.name),
+    effects: {
+      "career.parentClub": parentClubId,
+      "career.currentClub": target.id,
+      "career.loanReturnAge": returnAge,
+      "push:career.loanHistory": target.id,
+      "condition.morale": 6,
+    },
+    resultText: `You joined ${target.name} on a ${loanSeasons}-season loan for more first-team football.`,
+  };
+}
+
 export default [
   {
     id: "evt_transfer_window",
@@ -47,10 +64,11 @@ export default [
     category: "transfer",
     minAge: 19,
     maxAge: 33,
-    weight: 14,
+    weight: 18,
     conditions: {},
     dynamic: true,
     build(player, clubs) {
+      if (player.career.parentClub) return null; // can't arrange a permanent move while out on loan
       const currentClub = player.career.currentClub;
       const targets = pickEligibleClubs(player, clubs, 2);
       if (targets.length === 0) return null;
@@ -93,6 +111,7 @@ export default [
     conditions: { minReputationFanFame: 0 },
     dynamic: true,
     build(player, clubs) {
+      if (player.career.parentClub) return null; // can't leave the parent club while out on loan
       const currentClub = player.career.currentClub;
       const targets = pickEligibleClubs(player, clubs, 1);
       const currentClubName = clubs.find((c) => c.id === currentClub)?.name ?? currentClub;
@@ -136,6 +155,7 @@ export default [
     conditions: {},
     dynamic: true,
     build(player, clubs) {
+      if (player.career.parentClub) return null; // can't leave the parent club while out on loan
       const currentClub = player.career.currentClub;
       const targets = pickEligibleClubs(player, clubs, 1);
 
@@ -179,6 +199,42 @@ export default [
       return {
         text: "The club signs another player to compete for your place.",
         choices,
+      };
+    },
+  },
+
+  {
+    id: "evt_loan_offer",
+    type: "random",
+    category: "transfer",
+    minAge: 18,
+    maxAge: 30,
+    weight: 8,
+    conditions: {},
+    dynamic: true,
+    build(player, clubs) {
+      if (player.career.parentClub) return null; // already out on loan
+
+      const currentClubName =
+        clubs.find((c) => c.id === player.career.currentClub)?.name ?? "your club";
+      // Loans are easier to arrange than permanent moves, so we search with
+      // a generous reputation margin.
+      const targets = pickEligibleClubs(player, clubs, 1, 6);
+      if (targets.length === 0) return null;
+
+      const target = targets[0];
+      const loanSeasons = 2;
+
+      return {
+        text: `${target.name} want to take you on loan for ${loanSeasons} seasons to get regular first-team football.`,
+        choices: [
+          loanChoice(target, player.career.currentClub, loanSeasons, player.age + loanSeasons),
+          stayChoice(
+            `Stay and fight for minutes at ${currentClubName}`,
+            { "condition.morale": 4 },
+            "You chose to stay and fight for your place instead."
+          ),
+        ],
       };
     },
   },
