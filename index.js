@@ -4,6 +4,7 @@ import { createPlayer } from "./engine/player.js";
 import { runTurn, checkRetirement } from "./engine/turn.js";
 import { generateSummary } from "./engine/summary.js";
 import { getAcademyOffers } from "./engine/academy.js";
+import { computeOverall, computeMarketValue, describeCompetitiveness } from "./engine/rating.js";
 import clubs from "./data/clubs.js";
 
 const rl = readline.createInterface({ input, output });
@@ -25,12 +26,13 @@ function printStatus(player) {
   const c = player.condition;
   const r = player.reputation;
   const club = clubs.find((cl) => cl.id === player.career.currentClub);
+  const ovr = computeOverall(player);
 
   console.log(
-    `\n=== Age ${player.age} — ${club ? club.name : player.career.currentClub} (Tier ${club ? club.tier : "?"}) ===`
+    `\n=== Age ${player.age} — ${club ? club.name : "Unattached"} (Tier ${club ? club.tier : "?"}) ===`
   );
   console.log(
-    `Fitness ${c.fitness} | Morale ${c.morale} | Fame ${r.fanFame} | Market Value ${r.marketValue}${player.flags.isCaptain ? " | (C)" : ""}`
+    `OVR ${ovr} (${describeCompetitiveness(ovr)}) | Fitness ${c.fitness} | Morale ${c.morale} | Fame ${r.fanFame} | Value €${computeMarketValue(player)}M${player.flags.isCaptain ? " | (C)" : ""}`
   );
   console.log(
     `ATT ${s.attack} DEF ${s.defense} SPD ${s.speed} STA ${s.stamina} TEC ${s.technique} MEN ${s.mental}`

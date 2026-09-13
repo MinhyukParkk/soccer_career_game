@@ -1,79 +1,84 @@
-// Top-2-tier clubs from Europe's "big five" leagues, plus two fictional
-// starting academies (tier 4) used at career creation. Club names are used
+// Top-2-tier clubs from Europe's "big five" leagues. Club names are used
 // purely as factual game data (like any football sim), not as creative or
 // trademarked content — no crests/logos are reproduced here.
+//
+// `requiredOvr` is the player's overall rating needed to realistically
+// have a shot at this club: second-tier sides sit in the 50-60s (a 50-70
+// OVR player is competitive there), top-flight mid-table clubs need
+// 70-80, and the historic giants only come calling at 85+ (90+ is
+// genuine global-superstar territory).
 
 export default [
   // ===== England: Premier League (tier 1) =====
-  { id: "eng_mancity", name: "Manchester City", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 45, wageMultiplier: 2.4, styleBonus: { technique: 3 } },
-  { id: "eng_liverpool", name: "Liverpool", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 42, wageMultiplier: 2.2, styleBonus: { stamina: 3 } },
-  { id: "eng_arsenal", name: "Arsenal", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 30, wageMultiplier: 1.8, styleBonus: { technique: 2 } },
-  { id: "eng_manutd", name: "Manchester United", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 32, wageMultiplier: 1.9, styleBonus: { attack: 2 } },
-  { id: "eng_chelsea", name: "Chelsea", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 30, wageMultiplier: 1.8, styleBonus: { mental: 2 } },
-  { id: "eng_tottenham", name: "Tottenham Hotspur", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 26, wageMultiplier: 1.6, styleBonus: { attack: 2 } },
-  { id: "eng_newcastle", name: "Newcastle United", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 24, wageMultiplier: 1.5, styleBonus: { defense: 2 } },
-  { id: "eng_astonvilla", name: "Aston Villa", league: "Premier League", tier: 1, country: "ENG", reputationRequired: 22, wageMultiplier: 1.4, styleBonus: {} },
+  { id: "eng_mancity", name: "Manchester City", league: "Premier League", tier: 1, country: "ENG", requiredOvr: 88 },
+  { id: "eng_liverpool", name: "Liverpool", league: "Premier League", tier: 1, country: "ENG", requiredOvr: 86 },
+  { id: "eng_manutd", name: "Manchester United", league: "Premier League", tier: 1, country: "ENG", requiredOvr: 78 },
+  { id: "eng_arsenal", name: "Arsenal", league: "Premier League", tier: 1, country: "ENG", requiredOvr: 76 },
+  { id: "eng_chelsea", name: "Chelsea", league: "Premier League", tier: 1, country: "ENG", requiredOvr: 76 },
+  { id: "eng_tottenham", name: "Tottenham Hotspur", league: "Premier League", tier: 1, country: "ENG", requiredOvr: 74 },
+  { id: "eng_newcastle", name: "Newcastle United", league: "Premier League", tier: 1, country: "ENG", requiredOvr: 72 },
+  { id: "eng_astonvilla", name: "Aston Villa", league: "Premier League", tier: 1, country: "ENG", requiredOvr: 70 },
 
   // ===== England: Championship (tier 2) =====
-  { id: "eng_leeds", name: "Leeds United", league: "Championship", tier: 2, country: "ENG", reputationRequired: 14, wageMultiplier: 0.9, styleBonus: {} },
-  { id: "eng_leicester", name: "Leicester City", league: "Championship", tier: 2, country: "ENG", reputationRequired: 13, wageMultiplier: 0.85, styleBonus: {} },
-  { id: "eng_southampton", name: "Southampton", league: "Championship", tier: 2, country: "ENG", reputationRequired: 12, wageMultiplier: 0.8, styleBonus: {} },
-  { id: "eng_norwich", name: "Norwich City", league: "Championship", tier: 2, country: "ENG", reputationRequired: 10, wageMultiplier: 0.75, styleBonus: {} },
-  { id: "eng_sunderland", name: "Sunderland", league: "Championship", tier: 2, country: "ENG", reputationRequired: 11, wageMultiplier: 0.75, styleBonus: {} },
+  { id: "eng_leeds", name: "Leeds United", league: "Championship", tier: 2, country: "ENG", requiredOvr: 60 },
+  { id: "eng_leicester", name: "Leicester City", league: "Championship", tier: 2, country: "ENG", requiredOvr: 58 },
+  { id: "eng_sunderland", name: "Sunderland", league: "Championship", tier: 2, country: "ENG", requiredOvr: 54 },
+  { id: "eng_southampton", name: "Southampton", league: "Championship", tier: 2, country: "ENG", requiredOvr: 56 },
+  { id: "eng_norwich", name: "Norwich City", league: "Championship", tier: 2, country: "ENG", requiredOvr: 52 },
 
   // ===== Spain: La Liga (tier 1) =====
-  { id: "esp_realmadrid", name: "Real Madrid", league: "La Liga", tier: 1, country: "ESP", reputationRequired: 50, wageMultiplier: 2.6, styleBonus: { attack: 3, technique: 2 } },
-  { id: "esp_barcelona", name: "Barcelona", league: "La Liga", tier: 1, country: "ESP", reputationRequired: 48, wageMultiplier: 2.5, styleBonus: { technique: 3 } },
-  { id: "esp_atletico", name: "Atlético Madrid", league: "La Liga", tier: 1, country: "ESP", reputationRequired: 32, wageMultiplier: 1.8, styleBonus: { defense: 3 } },
-  { id: "esp_sociedad", name: "Real Sociedad", league: "La Liga", tier: 1, country: "ESP", reputationRequired: 24, wageMultiplier: 1.4, styleBonus: { technique: 2 } },
-  { id: "esp_athletic", name: "Athletic Club", league: "La Liga", tier: 1, country: "ESP", reputationRequired: 22, wageMultiplier: 1.4, styleBonus: { stamina: 2 } },
-  { id: "esp_sevilla", name: "Sevilla FC", league: "La Liga", tier: 1, country: "ESP", reputationRequired: 22, wageMultiplier: 1.3, styleBonus: {} },
+  { id: "esp_realmadrid", name: "Real Madrid", league: "La Liga", tier: 1, country: "ESP", requiredOvr: 92 },
+  { id: "esp_barcelona", name: "Barcelona", league: "La Liga", tier: 1, country: "ESP", requiredOvr: 90 },
+  { id: "esp_atletico", name: "Atlético Madrid", league: "La Liga", tier: 1, country: "ESP", requiredOvr: 80 },
+  { id: "esp_sociedad", name: "Real Sociedad", league: "La Liga", tier: 1, country: "ESP", requiredOvr: 73 },
+  { id: "esp_athletic", name: "Athletic Club", league: "La Liga", tier: 1, country: "ESP", requiredOvr: 72 },
+  { id: "esp_sevilla", name: "Sevilla FC", league: "La Liga", tier: 1, country: "ESP", requiredOvr: 71 },
 
   // ===== Spain: Segunda División (tier 2) =====
-  { id: "esp_racing", name: "Racing de Santander", league: "Segunda División", tier: 2, country: "ESP", reputationRequired: 9, wageMultiplier: 0.6, styleBonus: {} },
-  { id: "esp_oviedo", name: "Real Oviedo", league: "Segunda División", tier: 2, country: "ESP", reputationRequired: 8, wageMultiplier: 0.55, styleBonus: {} },
-  { id: "esp_levante", name: "Levante UD", league: "Segunda División", tier: 2, country: "ESP", reputationRequired: 10, wageMultiplier: 0.6, styleBonus: {} },
-  { id: "esp_eibar", name: "SD Eibar", league: "Segunda División", tier: 2, country: "ESP", reputationRequired: 8, wageMultiplier: 0.55, styleBonus: {} },
+  { id: "esp_levante", name: "Levante UD", league: "Segunda División", tier: 2, country: "ESP", requiredOvr: 53 },
+  { id: "esp_racing", name: "Racing de Santander", league: "Segunda División", tier: 2, country: "ESP", requiredOvr: 51 },
+  { id: "esp_oviedo", name: "Real Oviedo", league: "Segunda División", tier: 2, country: "ESP", requiredOvr: 50 },
+  { id: "esp_eibar", name: "SD Eibar", league: "Segunda División", tier: 2, country: "ESP", requiredOvr: 50 },
 
   // ===== Germany: Bundesliga (tier 1) =====
-  { id: "ger_bayern", name: "Bayern Munich", league: "Bundesliga", tier: 1, country: "GER", reputationRequired: 50, wageMultiplier: 2.6, styleBonus: { technique: 2, mental: 2 } },
-  { id: "ger_leverkusen", name: "Bayer Leverkusen", league: "Bundesliga", tier: 1, country: "GER", reputationRequired: 30, wageMultiplier: 1.7, styleBonus: { technique: 2 } },
-  { id: "ger_dortmund", name: "Borussia Dortmund", league: "Bundesliga", tier: 1, country: "GER", reputationRequired: 32, wageMultiplier: 1.8, styleBonus: { speed: 2 } },
-  { id: "ger_leipzig", name: "RB Leipzig", league: "Bundesliga", tier: 1, country: "GER", reputationRequired: 26, wageMultiplier: 1.5, styleBonus: { stamina: 2 } },
-  { id: "ger_unionberlin", name: "Union Berlin", league: "Bundesliga", tier: 1, country: "GER", reputationRequired: 20, wageMultiplier: 1.2, styleBonus: { defense: 2 } },
-  { id: "ger_frankfurt", name: "Eintracht Frankfurt", league: "Bundesliga", tier: 1, country: "GER", reputationRequired: 20, wageMultiplier: 1.2, styleBonus: {} },
+  { id: "ger_bayern", name: "Bayern Munich", league: "Bundesliga", tier: 1, country: "GER", requiredOvr: 91 },
+  { id: "ger_dortmund", name: "Borussia Dortmund", league: "Bundesliga", tier: 1, country: "GER", requiredOvr: 80 },
+  { id: "ger_leverkusen", name: "Bayer Leverkusen", league: "Bundesliga", tier: 1, country: "GER", requiredOvr: 79 },
+  { id: "ger_leipzig", name: "RB Leipzig", league: "Bundesliga", tier: 1, country: "GER", requiredOvr: 75 },
+  { id: "ger_frankfurt", name: "Eintracht Frankfurt", league: "Bundesliga", tier: 1, country: "GER", requiredOvr: 70 },
+  { id: "ger_unionberlin", name: "Union Berlin", league: "Bundesliga", tier: 1, country: "GER", requiredOvr: 70 },
 
   // ===== Germany: 2. Bundesliga (tier 2) =====
-  { id: "ger_hamburg", name: "Hamburger SV", league: "2. Bundesliga", tier: 2, country: "GER", reputationRequired: 11, wageMultiplier: 0.7, styleBonus: {} },
-  { id: "ger_dusseldorf", name: "Fortuna Düsseldorf", league: "2. Bundesliga", tier: 2, country: "GER", reputationRequired: 9, wageMultiplier: 0.6, styleBonus: {} },
-  { id: "ger_schalke", name: "Schalke 04", league: "2. Bundesliga", tier: 2, country: "GER", reputationRequired: 12, wageMultiplier: 0.7, styleBonus: {} },
-  { id: "ger_hertha", name: "Hertha BSC", league: "2. Bundesliga", tier: 2, country: "GER", reputationRequired: 11, wageMultiplier: 0.65, styleBonus: {} },
+  { id: "ger_schalke", name: "Schalke 04", league: "2. Bundesliga", tier: 2, country: "GER", requiredOvr: 56 },
+  { id: "ger_hamburg", name: "Hamburger SV", league: "2. Bundesliga", tier: 2, country: "GER", requiredOvr: 55 },
+  { id: "ger_hertha", name: "Hertha BSC", league: "2. Bundesliga", tier: 2, country: "GER", requiredOvr: 55 },
+  { id: "ger_dusseldorf", name: "Fortuna Düsseldorf", league: "2. Bundesliga", tier: 2, country: "GER", requiredOvr: 51 },
 
   // ===== Italy: Serie A (tier 1) =====
-  { id: "ita_inter", name: "Inter Milan", league: "Serie A", tier: 1, country: "ITA", reputationRequired: 38, wageMultiplier: 2.0, styleBonus: { defense: 2, mental: 2 } },
-  { id: "ita_milan", name: "AC Milan", league: "Serie A", tier: 1, country: "ITA", reputationRequired: 34, wageMultiplier: 1.9, styleBonus: { technique: 2 } },
-  { id: "ita_juventus", name: "Juventus", league: "Serie A", tier: 1, country: "ITA", reputationRequired: 40, wageMultiplier: 2.0, styleBonus: { mental: 3 } },
-  { id: "ita_napoli", name: "Napoli", league: "Serie A", tier: 1, country: "ITA", reputationRequired: 30, wageMultiplier: 1.7, styleBonus: { attack: 2 } },
-  { id: "ita_roma", name: "AS Roma", league: "Serie A", tier: 1, country: "ITA", reputationRequired: 26, wageMultiplier: 1.5, styleBonus: {} },
-  { id: "ita_atalanta", name: "Atalanta", league: "Serie A", tier: 1, country: "ITA", reputationRequired: 22, wageMultiplier: 1.3, styleBonus: { speed: 2 } },
+  { id: "ita_juventus", name: "Juventus", league: "Serie A", tier: 1, country: "ITA", requiredOvr: 85 },
+  { id: "ita_inter", name: "Inter Milan", league: "Serie A", tier: 1, country: "ITA", requiredOvr: 84 },
+  { id: "ita_milan", name: "AC Milan", league: "Serie A", tier: 1, country: "ITA", requiredOvr: 82 },
+  { id: "ita_napoli", name: "Napoli", league: "Serie A", tier: 1, country: "ITA", requiredOvr: 78 },
+  { id: "ita_roma", name: "AS Roma", league: "Serie A", tier: 1, country: "ITA", requiredOvr: 74 },
+  { id: "ita_atalanta", name: "Atalanta", league: "Serie A", tier: 1, country: "ITA", requiredOvr: 71 },
 
   // ===== Italy: Serie B (tier 2) =====
-  { id: "ita_parma", name: "Parma", league: "Serie B", tier: 2, country: "ITA", reputationRequired: 10, wageMultiplier: 0.6, styleBonus: {} },
-  { id: "ita_palermo", name: "Palermo", league: "Serie B", tier: 2, country: "ITA", reputationRequired: 9, wageMultiplier: 0.55, styleBonus: {} },
-  { id: "ita_bari", name: "Bari", league: "Serie B", tier: 2, country: "ITA", reputationRequired: 8, wageMultiplier: 0.5, styleBonus: {} },
-  { id: "ita_sampdoria", name: "Sampdoria", league: "Serie B", tier: 2, country: "ITA", reputationRequired: 11, wageMultiplier: 0.6, styleBonus: {} },
+  { id: "ita_sampdoria", name: "Sampdoria", league: "Serie B", tier: 2, country: "ITA", requiredOvr: 54 },
+  { id: "ita_parma", name: "Parma", league: "Serie B", tier: 2, country: "ITA", requiredOvr: 53 },
+  { id: "ita_palermo", name: "Palermo", league: "Serie B", tier: 2, country: "ITA", requiredOvr: 51 },
+  { id: "ita_bari", name: "Bari", league: "Serie B", tier: 2, country: "ITA", requiredOvr: 50 },
 
   // ===== France: Ligue 1 (tier 1) =====
-  { id: "fra_psg", name: "Paris Saint-Germain", league: "Ligue 1", tier: 1, country: "FRA", reputationRequired: 45, wageMultiplier: 2.4, styleBonus: { attack: 3 } },
-  { id: "fra_monaco", name: "AS Monaco", league: "Ligue 1", tier: 1, country: "FRA", reputationRequired: 24, wageMultiplier: 1.4, styleBonus: {} },
-  { id: "fra_marseille", name: "Olympique de Marseille", league: "Ligue 1", tier: 1, country: "FRA", reputationRequired: 24, wageMultiplier: 1.4, styleBonus: { mental: 2 } },
-  { id: "fra_lyon", name: "Olympique Lyonnais", league: "Ligue 1", tier: 1, country: "FRA", reputationRequired: 22, wageMultiplier: 1.3, styleBonus: {} },
-  { id: "fra_lille", name: "Lille OSC", league: "Ligue 1", tier: 1, country: "FRA", reputationRequired: 20, wageMultiplier: 1.2, styleBonus: { defense: 2 } },
-  { id: "fra_lens", name: "RC Lens", league: "Ligue 1", tier: 1, country: "FRA", reputationRequired: 18, wageMultiplier: 1.1, styleBonus: {} },
+  { id: "fra_psg", name: "Paris Saint-Germain", league: "Ligue 1", tier: 1, country: "FRA", requiredOvr: 89 },
+  { id: "fra_monaco", name: "AS Monaco", league: "Ligue 1", tier: 1, country: "FRA", requiredOvr: 73 },
+  { id: "fra_marseille", name: "Olympique de Marseille", league: "Ligue 1", tier: 1, country: "FRA", requiredOvr: 73 },
+  { id: "fra_lyon", name: "Olympique Lyonnais", league: "Ligue 1", tier: 1, country: "FRA", requiredOvr: 71 },
+  { id: "fra_lille", name: "Lille OSC", league: "Ligue 1", tier: 1, country: "FRA", requiredOvr: 70 },
+  { id: "fra_lens", name: "RC Lens", league: "Ligue 1", tier: 1, country: "FRA", requiredOvr: 70 },
 
   // ===== France: Ligue 2 (tier 2) =====
-  { id: "fra_bordeaux", name: "Girondins de Bordeaux", league: "Ligue 2", tier: 2, country: "FRA", reputationRequired: 11, wageMultiplier: 0.6, styleBonus: {} },
-  { id: "fra_saintetienne", name: "AS Saint-Étienne", league: "Ligue 2", tier: 2, country: "FRA", reputationRequired: 10, wageMultiplier: 0.6, styleBonus: {} },
-  { id: "fra_auxerre", name: "AJ Auxerre", league: "Ligue 2", tier: 2, country: "FRA", reputationRequired: 8, wageMultiplier: 0.5, styleBonus: {} },
-  { id: "fra_metz", name: "FC Metz", league: "Ligue 2", tier: 2, country: "FRA", reputationRequired: 9, wageMultiplier: 0.55, styleBonus: {} },
+  { id: "fra_bordeaux", name: "Girondins de Bordeaux", league: "Ligue 2", tier: 2, country: "FRA", requiredOvr: 54 },
+  { id: "fra_saintetienne", name: "AS Saint-Étienne", league: "Ligue 2", tier: 2, country: "FRA", requiredOvr: 53 },
+  { id: "fra_metz", name: "FC Metz", league: "Ligue 2", tier: 2, country: "FRA", requiredOvr: 51 },
+  { id: "fra_auxerre", name: "AJ Auxerre", league: "Ligue 2", tier: 2, country: "FRA", requiredOvr: 50 },
 ];

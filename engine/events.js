@@ -3,16 +3,21 @@ import transferEvents from "../data/events/transfer.js";
 import trainingEvents from "../data/events/training.js";
 import nationalTeamEvents from "../data/events/nationalTeam.js";
 import scandalEvents from "../data/events/scandal.js";
+import managerEvents from "../data/events/manager.js";
 import { getByPath, setByPath } from "./player.js";
 
 // All event categories combined into one pool. To add a new category,
 // create a new file under data/events/ and import + spread it here.
+// Note: evt_transfer_window (inside transferEvents) is handled specially
+// by engine/turn.js — it's guaranteed every season and isn't drawn from
+// this pool via weightedRandomPick like everything else.
 export const EVENT_POOL = [
   ...injuryEvents,
   ...transferEvents,
   ...trainingEvents,
   ...nationalTeamEvents,
   ...scandalEvents,
+  ...managerEvents,
 ];
 
 function meetsConditions(event, player) {
@@ -20,11 +25,6 @@ function meetsConditions(event, player) {
   const c = event.conditions || {};
   if (c.excludesFlag && player.flags[c.excludesFlag]) return false;
   if (c.requiresFlag && !player.flags[c.requiresFlag]) return false;
-  if (
-    c.minReputationScoutInterest &&
-    player.reputation.scoutInterest < c.minReputationScoutInterest
-  )
-    return false;
   if (
     c.minReputationFanFame &&
     player.reputation.fanFame < c.minReputationFanFame
@@ -47,10 +47,23 @@ export function weightedRandomPick(events) {
   return events[events.length - 1];
 }
 
+// Paths that should stay within a sane bounded range even after many
+// seasons of accumulated effects — without this, morale/fanFame in
+// particular can drift to nonsensical values over a long career.
+const CLAMPS = {
+  "condition.fitness": [0, 100],
+  "condition.morale": [0, 100],
+  "reputation.fanFame": [0, 100],
+  "stats.attack": [1, 99],
+  "stats.defense": [1, 99],
+  "stats.speed": [1, 99],
+  "stats.stamina": [1, 99],
+  "stats.technique": [1, 99],
+  "stats.mental": [1, 99],
+};
+
 export function applyEffects(effects, player) {
   for (const [path, value] of Object.entries(effects)) {
-    if (path === "delayTurns") continue; // handled by the turn engine if needed
-
     if (path.startsWith("push:")) {
       const arrPath = path.slice("push:".length);
       const arr = getByPath(player, arrPath);
@@ -59,11 +72,17 @@ export function applyEffects(effects, player) {
     }
 
     const current = getByPath(player, path);
+    let next;
     if (typeof current === "number") {
-      setByPath(player, path, current + value);
+      next = current + value;
     } else {
       setByPath(player, path, value); // booleans / direct assignment
+      continue;
     }
+
+    const clamp = CLAMPS[path];
+    if (clamp) next = Math.max(clamp[0], Math.min(clamp[1], next));
+    setByPath(player, path, next);
   }
 }
 

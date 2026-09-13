@@ -104,9 +104,9 @@
     <div class="section-title">Clubs Represented</div>
     <div class="club-list" id="clubList"><!-- rendered by JS --></div>
     <div class="note-box">
-      Match-by-match apps, goals, and assists per club arrive once the season
-      simulation engine is built — for now this lists every club on the
-      player's journey in order.
+      Per-club apps/goals/assists breakdowns aren't tracked yet — the stat
+      cards above show career totals, and this list shows every club on
+      the player's journey in order.
     </div>
 
     <div class="section-title">Honours Cabinet</div>
@@ -125,6 +125,7 @@
 
 <script type="module">
   import { generateSummary } from "../engine/summary.js";
+  import { computeMarketValue } from "../engine/rating.js";
   import clubs from "../data/clubs.js";
 
   const saved = sessionStorage.getItem("clubCarreraPlayer");
@@ -150,7 +151,7 @@
     <div class="stat-card"><div class="num">${summary.totalGoals}</div><div class="lab">Goals</div></div>
     <div class="stat-card"><div class="num">${summary.totalAssists}</div><div class="lab">Assists</div></div>
     <div class="stat-card"><div class="num">${summary.internationalCaps}</div><div class="lab">Int'l Caps</div></div>
-    <div class="stat-card"><div class="num">€${player.reputation.marketValue}K</div><div class="lab">Peak Value</div></div>
+    <div class="stat-card"><div class="num">€${computeMarketValue(player)}M</div><div class="lab">Peak Value</div></div>
     <div class="stat-card"><div class="num">${summary.clubsPlayedFor.length + 1}</div><div class="lab">Clubs</div></div>
   `;
 

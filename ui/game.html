@@ -79,9 +79,6 @@
   .event-choice.transfer-choice .choice-label { margin-bottom: 2px; }
   .event-choice.transfer-choice .choice-subtext { margin-bottom: 0; }
 
-  /* --- Academy offer step (career start) --- */
-  .offer-intro { font-family: 'PT Serif', serif; font-size: 15px; color: var(--ink-dim); margin-bottom: 18px; }
-
   /* --- Timeline --- */
   .timeline-panel { border: 1.5px solid var(--ink); padding: 0; max-height: 640px; overflow-y: auto; }
   table.timeline-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -152,7 +149,7 @@
 <script type="module">
   import { createPlayer } from "../engine/player.js";
   import { runTurn, checkRetirement } from "../engine/turn.js";
-  import { getPositionGroup } from "../engine/positions.js";
+  import { computeOverall, computeMarketValue, describeCompetitiveness } from "../engine/rating.js";
   import { applyEffects } from "../engine/events.js";
   import { getAcademyOffers } from "../engine/academy.js";
   import clubs from "../data/clubs.js";
@@ -176,48 +173,23 @@
   const timelineBodyEl = document.getElementById("timelineBody");
   const seasonLabelEl = document.getElementById("seasonLabel");
 
-  // Overall rating is weighted by role: attackers lean on attack/speed,
-  // midfielders on technique/mental/stamina, defenders on defense/mental,
-  // and the goalkeeper almost entirely on defense/mental — instead of a
-  // flat average of all six stats regardless of position. Role grouping
-  // itself comes from engine/positions.js so this always matches the
-  // groups used by the match simulation.
-  const OVERALL_WEIGHTS = {
-    attack:   { attack: 0.40, speed: 0.25, technique: 0.20, mental: 0.10, stamina: 0.05, defense: 0 },
-    midfield: { technique: 0.30, mental: 0.25, stamina: 0.20, attack: 0.15, defense: 0.10, speed: 0 },
-    defense:  { defense: 0.45, mental: 0.20, stamina: 0.15, speed: 0.15, technique: 0.05, attack: 0 },
-    gk:       { defense: 0.50, mental: 0.30, stamina: 0.20, attack: 0, speed: 0, technique: 0 },
-  };
-  function computeOverall(p) {
-    const group = getPositionGroup(p.identity.position);
-    const weights = OVERALL_WEIGHTS[group];
-    const total = Object.entries(weights).reduce(
-      (sum, [stat, w]) => sum + p.stats[stat] * w,
-      0
-    );
-    return Math.round(total);
-  }
-
-  function clubName(id) {
-    const club = clubs.find((c) => c.id === id);
-    return club ? club.name : id;
-  }
-
   function renderPlayerCard() {
     const club = clubs.find((c) => c.id === player.career.currentClub);
     const s = player.seasonLog;
+    const ovr = computeOverall(player);
     playerCardEl.innerHTML = `
       <div class="player-card-top">
-        <div class="ovr-badge">${computeOverall(player)}</div>
+        <div class="ovr-badge">${ovr}</div>
         <div class="player-name-block">
           <div class="name">${player.identity.lastName.toUpperCase()} · #${player.identity.number}</div>
-          <div class="sub">${player.identity.position} · ${club ? club.name : player.career.currentClub} · Age ${player.age}</div>
+          <div class="sub">${player.identity.position} · ${club ? club.name : "Unattached"} · Age ${player.age}</div>
+          <div class="sub">${describeCompetitiveness(ovr)}</div>
         </div>
       </div>
       <div class="player-meta-row">
         <div><div class="val">${player.condition.fitness}</div><div class="lab">Fitness</div></div>
         <div><div class="val">${player.reputation.fanFame}</div><div class="lab">Fame</div></div>
-        <div><div class="val">€${player.reputation.marketValue}K</div><div class="lab">Value</div></div>
+        <div><div class="val">€${computeMarketValue(player)}M</div><div class="lab">Value</div></div>
       </div>
       <div class="season-box">
         <span class="season-box-label">Last Stretch</span>
@@ -236,30 +208,32 @@
   // that actually matters to the player: how much their OVR would change.
   // We do this by applying the effects to a throwaway clone and diffing
   // computeOverall() before/after — no separate "what does FAME mean" tags.
+  // If a choice doesn't move OVR at all, we simply don't show a tag for it
+  // — a "+0 OVR" label isn't worth the clutter.
   function computeOvrDelta(effects) {
     const clone = structuredClone(player);
     applyEffects(effects, clone);
     return computeOverall(clone) - computeOverall(player);
   }
 
-  function ovrTagText(delta) {
-    const sign = delta > 0 ? "+" : "";
-    return `${sign}${delta} OVR`;
-  }
-
   function formatEffectTags(effects) {
     const delta = computeOvrDelta(effects);
-    return [{ text: ovrTagText(delta), positive: delta > 0 }];
+    if (delta === 0) return [];
+    const sign = delta > 0 ? "+" : "";
+    return [{ text: `${sign}${delta} OVR`, positive: delta > 0 }];
   }
 
   // For risky choices (choice.outcomes present), show each possible outcome
   // as its OVR impact plus probability — e.g. "+3 OVR · 65%" next to
   // "-5 OVR · 35%" — instead of abstract labels. This previews the real
-  // risk before the player commits.
+  // risk before the player commits. If a given outcome doesn't move OVR,
+  // we just show its probability alone rather than a meaningless "+0 OVR".
   function formatOutcomeTags(outcomes) {
     return outcomes.map((o) => {
       const delta = computeOvrDelta(o.effects);
-      return { text: `${ovrTagText(delta)} · ${Math.round(o.probability * 100)}%`, positive: delta > 0 };
+      const pct = `${Math.round(o.probability * 100)}%`;
+      const text = delta === 0 ? pct : `${delta > 0 ? "+" : ""}${delta} OVR · ${pct}`;
+      return { text, positive: delta > 0 };
     });
   }
 

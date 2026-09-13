@@ -1,21 +1,21 @@
-import { getPositionGroup } from "./positions.js";
+import { getPositionProfile } from "./positions.js";
 
-// Rough "how much this role contributes to goals/assists" multipliers.
-// Not meant to be a realistic match engine — just enough that an attacker's
-// stats visibly translate into goals, a midfielder's into assists, etc.
-const GOAL_FACTOR = { attack: 0.35, midfield: 0.12, defense: 0.03, gk: 0 };
-const ASSIST_FACTOR = { attack: 0.15, midfield: 0.25, defense: 0.08, gk: 0.01 };
+// Rough "how much this exact position contributes to goals/assists" —
+// each position now has its own factors (see positions.js) instead of a
+// coarse 4-group split. Not meant to be a realistic match engine — just
+// enough that a striker's stats visibly translate into goals, a winger's
+// into a mix of both, a center-back's into almost neither, etc.
 
 function randRange(min, max) {
   return min + Math.random() * (max - min);
 }
 
-// Simulates `seasons` worth of league matches for the player based on their
-// stats, fitness, and position. Mutates player.seasonLog (this stretch's
-// numbers) and player.careerLog (running totals), and returns the delta so
-// the UI can show "this season: X apps, Y goals, Z assists".
+// Simulates `seasons` worth of league matches for the player based on
+// their stats, fitness, and exact position. Mutates player.seasonLog (this
+// stretch's numbers) and player.careerLog (running totals), and returns
+// the delta so the UI can show "this season: X apps, Y goals, Z assists".
 export function simulateSeasons(player, seasons) {
-  const group = getPositionGroup(player.identity.position);
+  const { goalFactor, assistFactor } = getPositionProfile(player.identity.position);
 
   let matches = 0;
   let goals = 0;
@@ -29,10 +29,10 @@ export function simulateSeasons(player, seasons) {
     const techMentalAvg = (player.stats.technique + player.stats.mental) / 2;
 
     const seasonGoals = Math.round(
-      seasonMatches * GOAL_FACTOR[group] * (attackStat / 100) * randRange(0.7, 1.3)
+      seasonMatches * goalFactor * (attackStat / 100) * randRange(0.7, 1.3)
     );
     const seasonAssists = Math.round(
-      seasonMatches * ASSIST_FACTOR[group] * (techMentalAvg / 100) * randRange(0.7, 1.3)
+      seasonMatches * assistFactor * (techMentalAvg / 100) * randRange(0.7, 1.3)
     );
 
     matches += seasonMatches;

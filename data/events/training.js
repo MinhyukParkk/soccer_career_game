@@ -1,7 +1,6 @@
 export default [
   {
     id: "evt_training_focus",
-    type: "random",
     category: "training",
     minAge: 17,
     maxAge: 30,
@@ -15,7 +14,6 @@ export default [
         effects: {
           "stats.attack": 4,
           "stats.stamina": -1,
-          "reputation.marketValue": 2,
         },
         resultText: "Your finishing improved noticeably.",
       },
@@ -25,21 +23,19 @@ export default [
         effects: {
           "stats.stamina": 4,
           "condition.injuryRiskModifier": -5,
-          "reputation.marketValue": 1,
         },
         resultText: "You're in the best shape of your career.",
       },
       {
         id: "focus_technique",
         label: "Technical work",
-        effects: { "stats.technique": 4, "reputation.marketValue": 2 },
+        effects: { "stats.technique": 4 },
         resultText: "Your ball control took a step forward.",
       },
     ],
   },
   {
     id: "evt_training_mentor",
-    type: "random",
     category: "training",
     minAge: 17,
     maxAge: 28,
@@ -63,7 +59,6 @@ export default [
   },
   {
     id: "evt_training_media_day",
-    type: "random",
     category: "training",
     minAge: 18,
     maxAge: 34,
@@ -82,6 +77,43 @@ export default [
         label: "Skip it and train instead",
         effects: { "stats.stamina": 2, "reputation.fanFame": -2 },
         resultText: "You improved quietly, though fans noticed your absence.",
+      },
+    ],
+  },
+  {
+    id: "evt_training_double_session",
+    category: "training",
+    minAge: 18,
+    maxAge: 33,
+    weight: 5,
+    conditions: {},
+    text: "Two training sessions a day to improve your performance.",
+    choices: [
+      {
+        id: "train_hard",
+        label: "Train hard",
+        outcomes: [
+          {
+            probability: 0.65,
+            label: "Starter",
+            positive: true,
+            effects: { "stats.stamina": 3, "stats.mental": 1 },
+            resultText: "The extra work paid off — you're firmly in the starting XI conversation.",
+          },
+          {
+            probability: 0.35,
+            label: "Injury",
+            positive: false,
+            effects: { "condition.fitness": -15, "condition.injuryRiskModifier": 15 },
+            resultText: "The extra sessions caught up with you — you picked up a knock.",
+          },
+        ],
+      },
+      {
+        id: "reduce_load",
+        label: "Reduce the load",
+        effects: { "condition.fitness": 3 },
+        resultText: "You played it safe and protected your body.",
       },
     ],
   },
