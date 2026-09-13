@@ -5,6 +5,7 @@ import nationalTeamEvents from "../data/events/nationalTeam.js";
 import scandalEvents from "../data/events/scandal.js";
 import managerEvents from "../data/events/manager.js";
 import { getByPath, setByPath } from "./player.js";
+import { computeOverall } from "./rating.js";
 
 // All event categories combined into one pool. To add a new category,
 // create a new file under data/events/ and import + spread it here.
@@ -25,11 +26,7 @@ function meetsConditions(event, player) {
   const c = event.conditions || {};
   if (c.excludesFlag && player.flags[c.excludesFlag]) return false;
   if (c.requiresFlag && !player.flags[c.requiresFlag]) return false;
-  if (
-    c.minReputationFanFame &&
-    player.reputation.fanFame < c.minReputationFanFame
-  )
-    return false;
+  if (c.minOvr && computeOverall(player) < c.minOvr) return false;
   return true;
 }
 
@@ -48,12 +45,10 @@ export function weightedRandomPick(events) {
 }
 
 // Paths that should stay within a sane bounded range even after many
-// seasons of accumulated effects — without this, morale/fanFame in
-// particular can drift to nonsensical values over a long career.
+// seasons of accumulated effects — without this, morale in particular
+// can drift to nonsensical values over a long career.
 const CLAMPS = {
-  "condition.fitness": [0, 100],
   "condition.morale": [0, 100],
-  "reputation.fanFame": [0, 100],
   "stats.attack": [1, 99],
   "stats.defense": [1, 99],
   "stats.speed": [1, 99],

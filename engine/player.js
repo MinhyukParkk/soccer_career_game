@@ -36,15 +36,8 @@ export function createPlayer({ lastName, number, preferredFoot, country, positio
     },
     stats,
     condition: {
-      fitness: 100,
       morale: 70,
       injuryRiskModifier: 0,
-    },
-    reputation: {
-      fanFame: 0,
-      // No stored marketValue — it's derived from OVR/position/age via
-      // engine/rating.js's computeMarketValue(), so it never drifts out of
-      // sync with the player's actual stats.
     },
     flags: {
       hasDoped: false,

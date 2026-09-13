@@ -1,7 +1,6 @@
 export default [
   {
     id: "evt_doping_temptation",
-    type: "random",
     category: "scandal",
     minAge: 22,
     maxAge: 34,
@@ -29,7 +28,6 @@ export default [
   },
   {
     id: "evt_media_controversy",
-    type: "random",
     category: "scandal",
     minAge: 19,
     maxAge: 35,
@@ -40,20 +38,19 @@ export default [
       {
         id: "public_apology",
         label: "Issue a calm public apology",
-        effects: { "reputation.fanFame": -2, "condition.morale": 3 },
+        effects: { "condition.morale": 3 },
         resultText: "The story faded quickly after your response.",
       },
       {
         id: "stay_silent",
         label: "Say nothing and let it blow over",
-        effects: { "reputation.fanFame": -6, "condition.morale": -3 },
+        effects: { "condition.morale": -3 },
         resultText: "The silence let the story grow larger than it should have.",
       },
     ],
   },
   {
     id: "evt_nightlife_invite",
-    type: "random",
     category: "scandal",
     minAge: 18,
     maxAge: 30,
@@ -66,7 +63,7 @@ export default [
         label: "Go out and enjoy the night",
         effects: {
           "condition.morale": 6,
-          "condition.fitness": -8,
+          "stats.stamina": -3,
           "condition.injuryRiskModifier": 5,
         },
         resultText: "You had fun, but you're not at your sharpest for the match.",
@@ -74,14 +71,13 @@ export default [
       {
         id: "stay_in",
         label: "Stay in and rest",
-        effects: { "condition.fitness": 3, "stats.mental": 1 },
+        effects: { "stats.mental": 1 },
         resultText: "You woke up fresh and focused.",
       },
     ],
   },
   {
     id: "evt_risky_shortcut",
-    type: "random",
     category: "scandal",
     minAge: 23,
     maxAge: 33,
@@ -104,7 +100,7 @@ export default [
             probability: 0.25,
             label: "Suspension",
             positive: false,
-            effects: { "condition.morale": -15, "condition.fitness": -10, "reputation.fanFame": -8 },
+            effects: { "condition.morale": -15, "stats.stamina": -4 },
             resultText: "You were caught and hit with a long suspension.",
           },
         ],

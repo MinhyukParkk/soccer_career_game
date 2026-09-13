@@ -11,8 +11,8 @@ export default [
       {
         id: "rest",
         label: "Rest fully",
-        effects: { "condition.fitness": -10 },
-        resultText: "You rested fully and avoided further damage, though it cost you some sharpness.",
+        effects: {},
+        resultText: "You rested fully and avoided further damage.",
       },
       {
         id: "push_through",
@@ -22,7 +22,7 @@ export default [
             probability: 0.7,
             label: "Recovered fine",
             positive: true,
-            effects: { "condition.fitness": -3 },
+            effects: {},
             resultText: "You returned early and it paid off — no lasting damage.",
           },
           {
@@ -30,7 +30,6 @@ export default [
             label: "Setback",
             positive: false,
             effects: {
-              "condition.fitness": -12,
               "condition.injuryRiskModifier": 20,
               "stats.speed": -3,
             },
@@ -53,16 +52,14 @@ export default [
         id: "surgery_full_recovery",
         label: "Have surgery and rehab properly",
         effects: {
-          "condition.fitness": -20,
           "stats.speed": -3,
         },
-        resultText: "The surgery went well, but it set your fitness back and cost you a step of pace.",
+        resultText: "The surgery went well, but it cost you a step of pace.",
       },
       {
         id: "conservative_treatment",
         label: "Try conservative treatment instead",
         effects: {
-          "condition.fitness": -10,
           "condition.injuryRiskModifier": 20,
         },
         resultText: "You avoided surgery, but the knee remains a long-term risk.",

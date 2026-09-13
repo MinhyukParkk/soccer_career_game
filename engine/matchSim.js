@@ -22,8 +22,7 @@ export function simulateSeasons(player, seasons) {
   let assists = 0;
 
   for (let i = 0; i < seasons; i++) {
-    const fitnessFactor = player.condition.fitness < 40 ? 0.6 : 1;
-    const seasonMatches = Math.round(randRange(18, 34) * fitnessFactor);
+    const seasonMatches = Math.round(randRange(18, 34));
 
     const attackStat = player.stats.attack;
     const techMentalAvg = (player.stats.technique + player.stats.mental) / 2;

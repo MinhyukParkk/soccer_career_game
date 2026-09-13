@@ -23,7 +23,7 @@ export default [
             probability: 0.45,
             label: "Benched",
             positive: false,
-            effects: { "condition.morale": -10, "condition.fitness": -3 },
+            effects: { "condition.morale": -10 },
             resultText: "The conversation went badly — you were dropped for the next few matches.",
           },
         ],

@@ -1,9 +1,11 @@
+import { computeOverall } from "./rating.js";
+
 export function generateSummary(player) {
   const score =
     player.careerLog.totalGoals * 2 +
     player.careerLog.totalAssists +
-    player.career.internationalCaps +
-    player.reputation.fanFame;
+    player.career.internationalCaps * 3 +
+    computeOverall(player) * 2;
 
   let legacyTier = "journeyman";
   if (score > 200) legacyTier = "leyenda";

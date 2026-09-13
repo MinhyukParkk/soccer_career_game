@@ -104,7 +104,6 @@ export default [
           {
             "push:career.clubHistory": currentClub,
             "career.currentClub": target.id,
-            "reputation.fanFame": 5,
             "condition.morale": 10,
           },
           `You signed for ${target.name}.`
@@ -114,7 +113,7 @@ export default [
       choices.push(
         stayChoice(
           targets.length > 0 ? "Stay at your current club" : `Continue at ${currentClubName}`,
-          { "reputation.fanFame": 3, "condition.morale": 3 },
+          { "condition.morale": 3 },
           targets.length > 0
             ? "You chose to stay and fight for your place."
             : "No offers came in this window — you keep building your reputation."
@@ -203,7 +202,7 @@ export default [
               probability: 0.5,
               label: "Low rotation",
               positive: false,
-              effects: { "condition.morale": -8, "condition.fitness": -4 },
+              effects: { "condition.morale": -8 },
               resultText: "You lost the battle and slipped into a rotation role.",
             },
           ],

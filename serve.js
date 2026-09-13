@@ -19,11 +19,29 @@ const server = http.createServer((req, res) => {
   if (urlPath === "/") urlPath = "/index.html";
 
   const filePath = path.join(ROOT, urlPath);
+  console.log(`[request] ${req.method} ${urlPath}  ->  ${filePath}`);
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
+      // Show exactly what we looked for and where, plus what IS actually in
+      // that folder, so a 404 is diagnosable in one glance instead of a
+      // guessing game.
+      const dir = path.dirname(filePath);
+      let siblingList = "(couldn't read that folder)";
+      try {
+        siblingList = fs.readdirSync(dir).join(", ");
+      } catch {}
+      console.log(`[404] Looked for: ${filePath}`);
+      console.log(`[404] Files actually in ${dir}: ${siblingList}`);
+
       res.writeHead(404, { "Content-Type": "text/plain" });
-      res.end("404 Not Found: " + urlPath);
+      res.end(
+        `404 Not Found\n\n` +
+        `Requested URL: ${urlPath}\n` +
+        `Looked for file at: ${filePath}\n` +
+        `Files actually present in that folder: ${siblingList}\n\n` +
+        `If your file has a different name or is in a different folder, that's the mismatch to fix.`
+      );
       return;
     }
     const ext = path.extname(filePath);
@@ -35,5 +53,6 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`\nClub Carrera is running:`);
   console.log(`  http://localhost:${PORT}\n`);
+  console.log(`Serving files from: ${ROOT}\n`);
   console.log(`In Codespaces: check the "Ports" tab and open port ${PORT} in the browser.\n`);
 });

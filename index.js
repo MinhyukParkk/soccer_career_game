@@ -24,7 +24,6 @@ async function chooseFromList(promptText, options, labelFn) {
 function printStatus(player) {
   const s = player.stats;
   const c = player.condition;
-  const r = player.reputation;
   const club = clubs.find((cl) => cl.id === player.career.currentClub);
   const ovr = computeOverall(player);
 
@@ -32,7 +31,7 @@ function printStatus(player) {
     `\n=== Age ${player.age} — ${club ? club.name : "Unattached"} (Tier ${club ? club.tier : "?"}) ===`
   );
   console.log(
-    `OVR ${ovr} (${describeCompetitiveness(ovr)}) | Fitness ${c.fitness} | Morale ${c.morale} | Fame ${r.fanFame} | Value €${computeMarketValue(player)}M${player.flags.isCaptain ? " | (C)" : ""}`
+    `OVR ${ovr} (${describeCompetitiveness(ovr)}) | Morale ${c.morale} | Value €${computeMarketValue(player)}M${player.flags.isCaptain ? " | (C)" : ""}`
   );
   console.log(
     `ATT ${s.attack} DEF ${s.defense} SPD ${s.speed} STA ${s.stamina} TEC ${s.technique} MEN ${s.mental}`
