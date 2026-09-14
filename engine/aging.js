@@ -4,10 +4,12 @@ import { getPositionProfile } from "./positions.js";
 // the "OVR just climbs through your 20s and fades after your early 30s"
 // curve seen in real career sims. Applied every season inside runTurn.
 //
-// Growth/decline amounts are randomized with real variance (and a rare
-// "breakout" or "cliff" chance) so different careers actually diverge —
-// some players peak as solid pros around 65-70 OVR, others break out into
-// 90+ superstar territory, purely from the accumulated dice rolls.
+// Each player has a hidden, permanent `development.talent` multiplier
+// (rolled once at career creation — see engine/player.js) that scales
+// every season's growth. This is what actually produces real divergence
+// between careers: a high-talent roll compounds season after season into
+// a 90+ superstar, while a low-talent roll plateaus around 65-70, on top
+// of season-to-season randomness (some years jump, some barely move).
 
 function randRange(min, max) {
   return min + Math.random() * (max - min);
@@ -29,18 +31,22 @@ function pickStat(player, pool) {
 }
 
 export function applyAging(player, seasons) {
+  const talent = player.development?.talent ?? 1;
+
   for (let i = 0; i < seasons; i++) {
     const age = player.age;
 
     if (age <= 29) {
       // Development phase: young players naturally improve season to
-      // season, with a small chance of a breakout campaign.
-      const picks = 1 + Math.floor(Math.random() * 3); // 1-3 stats this season
+      // season — some years are a big leap, some barely move, and a
+      // genuine breakout campaign can happen on top of that.
+      const picks = 2 + Math.floor(Math.random() * 3); // 2-4 stats this season
       for (let p = 0; p < picks; p++) {
         const stat = pickStat(player, ALL_STATS);
-        let amount = Math.round(randRange(1, 4));
-        if (Math.random() < 0.08) amount += Math.round(randRange(3, 6)); // breakout
-        player.stats[stat] = Math.min(99, player.stats[stat] + amount);
+        let amount = randRange(1, 6) * talent;
+        if (Math.random() < 0.15) amount += randRange(5, 10) * talent; // breakout season
+        if (Math.random() < 0.10) amount *= 0.2; // quiet, stagnant season
+        player.stats[stat] = Math.min(99, Math.round(player.stats[stat] + amount));
       }
     } else if (age >= 32) {
       // Decline phase: physical attributes go first; occasional sharp
@@ -48,9 +54,9 @@ export function applyAging(player, seasons) {
       const picks = 1 + Math.floor(Math.random() * 2); // 1-2 stats this season
       for (let p = 0; p < picks; p++) {
         const stat = pickStat(player, DECLINE_PHYSICAL);
-        let amount = Math.round(randRange(1, 4));
-        if (Math.random() < 0.06) amount += Math.round(randRange(3, 5)); // cliff
-        player.stats[stat] = Math.max(1, player.stats[stat] - amount);
+        let amount = randRange(1, 5);
+        if (Math.random() < 0.1) amount += randRange(4, 7); // cliff
+        player.stats[stat] = Math.max(1, Math.round(player.stats[stat] - amount));
       }
     }
     // Ages 30-31: peak plateau — no automatic change either way.

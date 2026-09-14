@@ -110,12 +110,27 @@ export default [
         )
       );
 
+      // If no permanent move is realistic yet, a loan is the live option
+      // instead — this is how real young/low-OVR players actually move,
+      // so it shows up right in the main transfer window rather than being
+      // a rare side event.
+      let loanTarget = null;
+      if (targets.length === 0 && player.age <= 31) {
+        const loanTargets = pickEligibleClubs(player, clubs, 1, 10);
+        if (loanTargets.length > 0) {
+          loanTarget = loanTargets[0];
+          choices.push(loanChoice(loanTarget, currentClub, 2, player.age + 2));
+        }
+      }
+
       choices.push(
         stayChoice(
           targets.length > 0 ? "Stay at your current club" : `Continue at ${currentClubName}`,
           { "condition.morale": 3 },
           targets.length > 0
             ? "You chose to stay and fight for your place."
+            : loanTarget
+            ? "No permanent suitors yet — but you turned down the loan too."
             : "No offers came in this window — you keep building your reputation."
         )
       );
@@ -124,6 +139,8 @@ export default [
         text:
           targets.length > 0
             ? "Offers arrived this transfer window. You can accept one or stay at your club."
+            : loanTarget
+            ? "No permanent suitors yet, but a loan move could get you regular minutes."
             : "The transfer window comes and goes with no concrete offers yet.",
         choices,
       };

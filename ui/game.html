@@ -27,6 +27,36 @@
     font-family: 'Bebas Neue', sans-serif; font-size: 30px;
     width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    position: relative;
+    transition: transform 0.25s ease;
+  }
+  .ovr-badge.bump-up { animation: ovr-pulse-up 0.7s ease; }
+  .ovr-badge.bump-down { animation: ovr-pulse-down 0.7s ease; }
+  @keyframes ovr-pulse-up {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139,42,42,0.5); }
+    35% { transform: scale(1.22); box-shadow: 0 0 0 8px rgba(139,42,42,0.15); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139,42,42,0); }
+  }
+  @keyframes ovr-pulse-down {
+    0% { transform: scale(1); }
+    35% { transform: scale(0.88); filter: grayscale(0.4); }
+    100% { transform: scale(1); filter: grayscale(0); }
+  }
+  .ovr-delta-float {
+    position: absolute; top: -6px; right: -10px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 15px;
+    padding: 2px 7px; border-radius: 10px;
+    background: var(--paper); border: 1.5px solid var(--ink);
+    animation: ovr-float-up 1.4s ease forwards;
+    pointer-events: none;
+  }
+  .ovr-delta-float.positive { color: var(--red); border-color: var(--red); }
+  .ovr-delta-float.negative { color: var(--ink-dim); }
+  @keyframes ovr-float-up {
+    0% { opacity: 0; transform: translateY(6px) scale(0.8); }
+    20% { opacity: 1; transform: translateY(-2px) scale(1.05); }
+    75% { opacity: 1; transform: translateY(-18px) scale(1); }
+    100% { opacity: 0; transform: translateY(-30px) scale(0.95); }
   }
   .player-name-block .name { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.02em; }
   .player-name-block .sub { font-size: 12.5px; color: var(--ink-dim); }
@@ -173,13 +203,17 @@
   const timelineBodyEl = document.getElementById("timelineBody");
   const seasonLabelEl = document.getElementById("seasonLabel");
 
+  let previousOvr = null;
+
   function renderPlayerCard() {
     const club = clubs.find((c) => c.id === player.career.currentClub);
     const s = player.seasonLog;
     const ovr = computeOverall(player);
+    const delta = previousOvr === null ? 0 : ovr - previousOvr;
+
     playerCardEl.innerHTML = `
       <div class="player-card-top">
-        <div class="ovr-badge">${ovr}</div>
+        <div class="ovr-badge" id="ovrBadge">${ovr}</div>
         <div class="player-name-block">
           <div class="name">${player.identity.lastName.toUpperCase()} · #${player.identity.number}</div>
           <div class="sub">${player.identity.position} · ${club ? club.name : "Unattached"} · Age ${player.age}</div>
@@ -200,6 +234,22 @@
           : "Empty Trophy Case"
       }</div>
     `;
+
+    // Pulse the OVR badge and float a "+N"/"-N" label whenever the rating
+    // actually moved since the last render — the whole point being that
+    // some seasons barely move the needle and some jump noticeably, and
+    // the animation should make that swing feel real.
+    if (delta !== 0) {
+      const badge = document.getElementById("ovrBadge");
+      badge.classList.add(delta > 0 ? "bump-up" : "bump-down");
+      const floatEl = document.createElement("div");
+      floatEl.className = `ovr-delta-float ${delta > 0 ? "positive" : "negative"}`;
+      floatEl.textContent = `${delta > 0 ? "+" : ""}${delta}`;
+      badge.appendChild(floatEl);
+      setTimeout(() => floatEl.remove(), 1500);
+    }
+
+    previousOvr = ovr;
     seasonLabelEl.textContent = `Age ${player.age}`;
   }
 

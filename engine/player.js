@@ -23,9 +23,18 @@ export function createPlayer({ lastName, number, preferredFoot, country, positio
     stats[stat] = Math.max(1, Math.min(99, baseStats[stat] + adjust));
   }
 
+  // Rolled once per career and never shown to the player directly — this
+  // is what makes one career peak as a solid 65-70 OVR pro and another
+  // break out into a 90+ superstar, even with identical choices. Using
+  // three averaged rolls biases toward the middle (most careers are
+  // "pretty good") while still allowing real long-tail outcomes.
+  const talentRoll = (Math.random() + Math.random() + Math.random()) / 3;
+  const talent = 0.55 + talentRoll * 1.5; // roughly 0.55 (bust) to 2.05 (generational)
+
   return {
     identity: { lastName, number, preferredFoot, country, position },
     age: 17,
+    development: { talent },
     career: {
       currentClub: null, // assigned via the academy-offer step at career start
       parentClub: null, // set while out on loan; cleared automatically on return
