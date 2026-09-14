@@ -132,7 +132,7 @@
   const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
   if (!saved) {
     console.warn("No player found — redirecting to character creation.");
-    window.location.href = dir + "character-creation.html";
+    window.location.href = dir + "character_creation.html";
   }
   const player = JSON.parse(saved);
   const summary = generateSummary(player);
@@ -176,7 +176,7 @@
 
   document.getElementById("playAgainBtn").addEventListener("click", () => {
     sessionStorage.removeItem("clubCarreraPlayer");
-    window.location.href = dir + "character-creation.html";
+    window.location.href = dir + "character_creation.html";
   });
 </script>
 
