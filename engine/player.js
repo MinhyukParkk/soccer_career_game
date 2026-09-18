@@ -64,6 +64,11 @@ export function createPlayer({ lastName, number, preferredFoot, country, positio
       totalAssists: 0,
       collectiveTitles: [],
       individualAwards: [],
+      // Per-club-stint breakdown, in chronological order. A new entry
+      // starts whenever currentClub differs from the most recent stint;
+      // consecutive seasons at the same club accumulate onto it. Filled in
+      // by engine/matchSim.js.
+      clubStints: [],
     },
   };
 }

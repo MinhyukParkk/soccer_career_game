@@ -45,7 +45,13 @@
   .club-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
   .club-card { border: 1.5px solid var(--ink); padding: 16px; }
   .club-card .club-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; margin-bottom: 4px; }
-  .club-card .club-meta { font-size: 12px; color: var(--ink-dim); }
+  .club-card .club-meta { font-size: 12px; color: var(--ink-dim); margin-bottom: 10px; }
+  .club-card .club-stats {
+    display: flex; justify-content: space-between;
+    font-size: 12.5px; color: var(--ink-dim);
+    border-top: 1px dotted var(--ink-faint); padding-top: 8px;
+  }
+  .club-card .club-stats b { color: var(--ink); font-family: 'Bebas Neue', sans-serif; font-size: 14px; }
 
   .note-box {
     font-size: 12.5px; color: var(--ink-dim); font-style: italic;
@@ -103,11 +109,6 @@
 
     <div class="section-title">Clubs Represented</div>
     <div class="club-list" id="clubList"><!-- rendered by JS --></div>
-    <div class="note-box">
-      Per-club apps/goals/assists breakdowns aren't tracked yet — the stat
-      cards above show career totals, and this list shows every club on
-      the player's journey in order.
-    </div>
 
     <div class="section-title">Honours Cabinet</div>
     <div class="trophy-cabinet" id="trophyCabinet">Empty Trophy Case</div>
@@ -152,19 +153,23 @@
     <div class="stat-card"><div class="num">${summary.totalAssists}</div><div class="lab">Assists</div></div>
     <div class="stat-card"><div class="num">${summary.internationalCaps}</div><div class="lab">Int'l Caps</div></div>
     <div class="stat-card"><div class="num">€${computeMarketValue(player)}M</div><div class="lab">Peak Value</div></div>
-    <div class="stat-card"><div class="num">${summary.clubsPlayedFor.length + 1}</div><div class="lab">Clubs</div></div>
+    <div class="stat-card"><div class="num">${summary.clubStints.length}</div><div class="lab">Clubs</div></div>
   `;
 
-  // Every club on the journey, in order: past clubs from clubHistory, then
-  // the club the player retired at (currentClub).
-  const journey = [...summary.clubsPlayedFor, player.career.currentClub];
-  document.getElementById("clubList").innerHTML = journey
-    .map((id) => {
-      const club = clubInfo(id);
+  // Every stint on the journey, in chronological order, each with its own
+  // real apps/goals/assists — not just a name, an actual per-club record.
+  document.getElementById("clubList").innerHTML = summary.clubStints
+    .map((stint) => {
+      const club = clubInfo(stint.clubId);
       return `
         <div class="club-card">
           <div class="club-name">${club.name}</div>
-          <div class="club-meta">Tier ${club.tier} · ${club.country}</div>
+          <div class="club-meta">${club.league ?? "Tier " + club.tier} · ${club.country}</div>
+          <div class="club-stats">
+            <span><b>${stint.matches}</b> APPS</span>
+            <span><b>${stint.goals}</b> GLS</span>
+            <span><b>${stint.assists}</b> AST</span>
+          </div>
         </div>`;
     })
     .join("");

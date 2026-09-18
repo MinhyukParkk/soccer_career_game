@@ -10,10 +10,28 @@ function randRange(min, max) {
   return min + Math.random() * (max - min);
 }
 
+// A new stint starts whenever the player's club differs from the most
+// recent one on record; consecutive seasons at the same club just
+// accumulate onto the existing entry (covers normal tenure, loan spells,
+// and moving back to a previous club as separate stints).
+function recordClubStint(player, clubId, matches, goals, assists) {
+  if (!clubId) return;
+  const stints = player.careerLog.clubStints;
+  const last = stints[stints.length - 1];
+  if (last && last.clubId === clubId) {
+    last.matches += matches;
+    last.goals += goals;
+    last.assists += assists;
+  } else {
+    stints.push({ clubId, matches, goals, assists });
+  }
+}
+
 // Simulates `seasons` worth of league matches for the player based on
 // their stats, fitness, and exact position. Mutates player.seasonLog (this
-// stretch's numbers) and player.careerLog (running totals), and returns
-// the delta so the UI can show "this season: X apps, Y goals, Z assists".
+// stretch's numbers) and player.careerLog (running totals + per-club
+// breakdown), and returns the delta so the UI can show "this season: X
+// apps, Y goals, Z assists".
 export function simulateSeasons(player, seasons) {
   const { goalFactor, assistFactor } = getPositionProfile(player.identity.position);
 
@@ -37,6 +55,11 @@ export function simulateSeasons(player, seasons) {
     matches += seasonMatches;
     goals += seasonGoals;
     assists += seasonAssists;
+
+    // Attribute this season's numbers to whichever club is current right
+    // now — callers run this once per season, after that season's transfer
+    // decision has already been applied, so currentClub is always accurate.
+    recordClubStint(player, player.career.currentClub, seasonMatches, seasonGoals, seasonAssists);
   }
 
   player.seasonLog.matchesPlayed = matches;

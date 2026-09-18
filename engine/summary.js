@@ -17,6 +17,7 @@ export function generateSummary(player) {
     totalGoals: player.careerLog.totalGoals,
     totalAssists: player.careerLog.totalAssists,
     clubsPlayedFor: player.career.clubHistory,
+    clubStints: player.careerLog.clubStints,
     collectiveTitles: player.careerLog.collectiveTitles,
     individualAwards: player.careerLog.individualAwards,
     internationalCaps: player.career.internationalCaps,
