@@ -229,9 +229,10 @@
         <span>${s.matchesPlayed} APPS</span><span>${s.goals} GLS</span><span>${s.assists} AST</span>
       </div>
       <div class="trophy-box">${
-        player.careerLog.collectiveTitles.length
-          ? player.careerLog.collectiveTitles.join(" · ")
-          : "Empty Trophy Case"
+        (() => {
+          const all = [...player.careerLog.collectiveTitles, ...player.careerLog.individualAwards];
+          return all.length ? all.join(" · ") : "Empty Trophy Case";
+        })()
       }</div>
     `;
 

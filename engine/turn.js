@@ -1,6 +1,8 @@
 import { EVENT_POOL, filterEligibleEvents, weightedRandomPick, applyEffects, resolveChoiceOutcome } from "./events.js";
 import { simulateSeasons } from "./matchSim.js";
 import { applyAging } from "./aging.js";
+import { rollSeasonTrophy } from "./trophies.js";
+import { rollSeasonAwards } from "./awards.js";
 import clubs from "../data/clubs.js";
 
 const TRANSFER_WINDOW_EVENT = EVENT_POOL.find((e) => e.id === "evt_transfer_window");
@@ -93,6 +95,16 @@ export async function runTurn(player, turnLength = 2, chooseFn = autoChoose) {
     totalSeason.matches += seasonStats.matches;
     totalSeason.goals += seasonStats.goals;
     totalSeason.assists += seasonStats.assists;
+
+    // Whether the club actually wins something this season — the real
+    // difference between playing for a giant and playing for a minnow.
+    const trophyResult = rollSeasonTrophy(player, clubs);
+    if (trophyResult) resultParts.push(trophyResult);
+
+    // Personal recognition for a standout individual season, separate
+    // from whatever the club did collectively.
+    const awardResult = rollSeasonAwards(player, clubs, seasonStats.goals);
+    if (awardResult) resultParts.push(awardResult);
   }
 
   return {
