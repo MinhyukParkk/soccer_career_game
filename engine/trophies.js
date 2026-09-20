@@ -29,9 +29,10 @@ function addTrophy(player, label) {
 }
 
 // Rolls this season's trophy chance for whichever club the player is
-// currently at. Returns a short result string if something was won, or
-// null otherwise (most seasons, for most clubs, win nothing — that's the
-// point: it should feel rare unless you're at a genuine giant).
+// currently at. Returns { label, resultText } if something was won (label
+// is the clean trophy name, e.g. "La Liga Champions", for the UI to show
+// directly), or null otherwise (most seasons, for most clubs, win nothing
+// — that's the point: it should feel rare unless you're at a genuine giant).
 export function rollSeasonTrophy(player, clubs) {
   const club = clubs.find((c) => c.id === player.career.currentClub);
   const profile = trophyProfileFor(club);
@@ -39,7 +40,7 @@ export function rollSeasonTrophy(player, clubs) {
 
   if (Math.random() < profile.chance) {
     addTrophy(player, profile.label);
-    return `${club.name} won the ${profile.label}!`;
+    return { label: profile.label, resultText: `${club.name} won the ${profile.label}!` };
   }
   return null;
 }

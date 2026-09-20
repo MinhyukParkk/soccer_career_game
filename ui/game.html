@@ -120,6 +120,12 @@
   table.timeline-table td { padding: 9px 14px; border-bottom: 1px dotted var(--ink-faint); }
   table.timeline-table tr.current-row td { background: var(--paper-dark); font-weight: 700; }
   table.timeline-table td.age-cell { font-family: 'Bebas Neue', sans-serif; }
+  .honour-tag {
+    font-family: 'Bebas Neue', sans-serif; font-size: 10.5px; letter-spacing: 0.05em;
+    text-transform: uppercase; border: 1.5px solid var(--ink); color: var(--ink-dim);
+    padding: 2px 7px; margin-right: 5px; display: inline-block;
+  }
+  .honour-tag.trophy { border-color: var(--red); color: var(--red); }
 
   @media (max-width: 1000px) {
     .game-grid { grid-template-columns: 1fr; }
@@ -133,7 +139,7 @@
     <div class="logo"><span class="mark">⬢</span> CLUB CARRERA</div>
     <div class="links">
       <a href="#" class="current">Career</a>
-      <a href="#">Leaderboards</a>
+      <a href="history.html">History</a>
       <a href="#">How It Works</a>
       <a href="#">Blog</a>
     </div>
@@ -162,7 +168,7 @@
       <div class="timeline-panel">
         <table class="timeline-table">
           <thead>
-            <tr><th>Age</th><th>Club</th><th>APPS</th><th>GLS</th><th>AST</th><th>Note</th></tr>
+            <tr><th>Age</th><th>Club</th><th>APPS</th><th>GLS</th><th>AST</th><th>Honours</th></tr>
           </thead>
           <tbody id="timelineBody"><!-- rows added by JS --></tbody>
         </table>
@@ -337,17 +343,21 @@
     });
   }
 
-  function addTimelineRow(season, note) {
+  function addTimelineRow(season, wonTrophies, wonAwards) {
     const club = clubs.find((c) => c.id === player.career.currentClub);
     const row = document.createElement("tr");
     row.className = "current-row";
+    const tags = [
+      ...wonTrophies.map((label) => `<span class="honour-tag trophy">${label}</span>`),
+      ...wonAwards.map((label) => `<span class="honour-tag">${label}</span>`),
+    ].join("");
     row.innerHTML = `
       <td class="age-cell">${player.age}</td>
       <td>${club ? club.name : player.career.currentClub}</td>
       <td>${season.matches}</td>
       <td>${season.goals}</td>
       <td>${season.assists}</td>
-      <td>${note ? note : "<em>Quiet season</em>"}</td>
+      <td>${tags}</td>
     `;
     document.querySelectorAll("#timelineBody tr.current-row").forEach((r) => r.classList.remove("current-row"));
     timelineBodyEl.appendChild(row);
@@ -406,11 +416,9 @@
     while (!checkRetirement(player)) {
       const result = await runTurn(player, turnLength, domChoose);
       renderPlayerCard();
+      addTimelineRow(result.season, result.wonTrophies, result.wonAwards);
 
-      if (result.resultText) {
-        addTimelineRow(result.season, result.resultText);
-      } else {
-        addTimelineRow(result.season, null);
+      if (!result.resultText) {
         eventPanelEl.innerHTML = `
           <div class="event-eyebrow">Career Decision</div>
           <div class="event-headline">Nothing major happened this season. Training continues quietly.</div>

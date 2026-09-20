@@ -21,8 +21,9 @@ function addAward(player, label) {
 }
 
 // Rolls this season's individual awards. A season can win more than one
-// (e.g. Golden Boot and Player of the Season together) — returns a
-// combined result string, or null if nothing was won.
+// (e.g. Golden Boot and Player of the Season together) — returns
+// { labels, resultText } where labels are the clean award names for the
+// UI to show directly, or null if nothing was won.
 export function rollSeasonAwards(player, clubs, seasonGoals) {
   const club = clubs.find((c) => c.id === player.career.currentClub);
   if (!club) return null;
@@ -30,35 +31,39 @@ export function rollSeasonAwards(player, clubs, seasonGoals) {
   const baseline = currentLeagueBaseline(player, clubs);
   const ovr = computeOverall(player);
   const advantage = ovr - baseline;
-  const wins = [];
+  const labels = [];
 
   // Golden Boot: a genuinely standout scoring season for this league.
   const goalThreshold = club.tier === 1 ? 18 : 22;
   if (seasonGoals >= goalThreshold && Math.random() < 0.35) {
-    addAward(player, `${club.league} Golden Boot`);
-    wins.push("the Golden Boot");
+    const label = `${club.league} Golden Boot`;
+    addAward(player, label);
+    labels.push(label);
   }
 
   // Player of the Season: a real standout relative to the league overall.
   if (advantage >= 15 && Math.random() < 0.2) {
-    addAward(player, `${club.league} Player of the Season`);
-    wins.push(`${club.league} Player of the Season`);
+    const label = `${club.league} Player of the Season`;
+    addAward(player, label);
+    labels.push(label);
   }
 
   // Young Player of the Year: same bar, but scaled down for a teenager/
   // early-20s player who's already punching above their league.
   if (player.age <= 21 && advantage >= 8 && Math.random() < 0.25) {
-    addAward(player, `${club.league} Young Player of the Year`);
-    wins.push(`${club.league} Young Player of the Year`);
+    const label = `${club.league} Young Player of the Year`;
+    addAward(player, label);
+    labels.push(label);
   }
 
   // World Player of the Year: exceedingly rare — reserved for genuine
   // global superstars (OVR 90+, the top band in engine/rating.js).
   if (ovr >= 90 && Math.random() < 0.07) {
-    addAward(player, "World Player of the Year");
-    wins.push("World Player of the Year");
+    const label = "World Player of the Year";
+    addAward(player, label);
+    labels.push(label);
   }
 
-  if (wins.length === 0) return null;
-  return `You won ${wins.join(" and ")}!`;
+  if (labels.length === 0) return null;
+  return { labels, resultText: `You won ${labels.join(" and ")}!` };
 }

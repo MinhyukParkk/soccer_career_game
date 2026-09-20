@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Club Carrera — Career History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Page-specific layout for the career history / archive list only. */
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid var(--ink);
+    padding: 34px 0 18px;
+  }
+  h1 { font-size: 44px; margin: 6px 0 0; }
+  .kicker { font-size: 12px; letter-spacing: 0.14em; color: var(--ink-dim); text-transform: uppercase; }
+
+  .history-list { display: flex; flex-direction: column; gap: 14px; padding: 30px 0; }
+
+  .history-card {
+    border: 1.5px solid var(--ink);
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: 60px 1.3fr 1fr 1fr 1fr auto auto;
+    gap: 18px;
+    align-items: center;
+  }
+  .history-card .ovr-chip {
+    background: var(--red); color: var(--paper);
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .history-card .name-block .name { font-family: 'Bebas Neue', sans-serif; font-size: 19px; }
+  .history-card .name-block .sub { font-size: 11.5px; color: var(--ink-dim); }
+  .history-card .stat-block { text-align: center; }
+  .history-card .stat-block .val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; }
+  .history-card .stat-block .lab { font-size: 10px; letter-spacing: 0.06em; color: var(--ink-faint); text-transform: uppercase; }
+  .history-card .legacy-tag {
+    border: 1.5px solid var(--red); color: var(--red);
+    font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.05em;
+    padding: 5px 10px; text-align: center; text-transform: uppercase; white-space: nowrap;
+  }
+  .history-card .trophy-line {
+    grid-column: 1 / -1;
+    font-size: 11.5px; color: var(--ink-dim); font-style: italic;
+    border-top: 1px dotted var(--ink-faint); padding-top: 10px; margin-top: 4px;
+  }
+  .history-card .delete-btn {
+    border: 1.5px solid var(--ink-faint); background: transparent; color: var(--ink-dim);
+    font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.05em;
+    padding: 8px 12px; cursor: pointer; white-space: nowrap;
+  }
+  .history-card .delete-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .empty-state {
+    border: 1.5px dashed var(--ink-faint);
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--ink-dim);
+  }
+  .empty-state .big { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--ink); margin-bottom: 8px; }
+
+  .footer-actions { display: flex; justify-content: center; gap: 14px; padding: 20px 0 50px; }
+
+  @media (max-width: 900px) {
+    .history-card { grid-template-columns: 1fr 1fr; }
+    .history-card .ovr-chip { grid-row: span 2; }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="logo"><span class="mark">⬢</span> CLUB CARRERA</div>
+    <div class="links">
+      <a href="characterCreation.html">Career</a>
+      <a href="history.html" class="current">History</a>
+      <a href="#">How It Works</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="auth">
+      <a href="#">Log in</a>
+      <a href="#" class="signup">Sign up</a>
+    </div>
+  </nav>
+
+  <div class="subnav">
+    <span>Career Sim / History</span>
+    <span id="countLabel">— careers</span>
+  </div>
+
+  <div class="page">
+
+    <div class="header-row">
+      <div>
+        <div class="kicker">Archive</div>
+        <h1>Career History</h1>
+      </div>
+      <div class="stamp" id="bestStamp">—</div>
+    </div>
+
+    <div id="historyContainer"><!-- rendered by JS --></div>
+
+    <div class="footer-actions">
+      <button class="back-btn" id="clearBtn">Clear History</button>
+      <button class="kickoff-btn" id="newCareerBtn">Start New Career</button>
+    </div>
+
+  </div>
+
+  <div class="site-footer">
+    <span>Club Carrera · Sim Engine 0.1</span>
+    <span>Runs In Your Browser</span>
+  </div>
+
+<script type="module">
+  import clubs from "../data/clubs.js";
+  import { getCareerHistory, clearCareerHistory, deleteCareerRecord } from "./careerHistory.js";
+
+  const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
+
+  function clubName(id) {
+    const club = clubs.find((c) => c.id === id);
+    return club ? club.name : "Unattached";
+  }
+
+  function formatDate(ts) {
+    return new Date(ts).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  function render() {
+    const history = getCareerHistory();
+    const container = document.getElementById("historyContainer");
+    const countLabel = document.getElementById("countLabel");
+    const bestStamp = document.getElementById("bestStamp");
+
+    countLabel.textContent = `${history.length} career${history.length === 1 ? "" : "s"}`;
+
+    if (history.length === 0) {
+      bestStamp.textContent = "—";
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="big">No careers saved yet</div>
+          <div>Finish a career and it'll show up here.</div>
+        </div>`;
+      return;
+    }
+
+    const best = history.reduce((a, b) => (b.finalOvr > a.finalOvr ? b : a));
+    bestStamp.textContent = `Best: ${best.finalOvr} OVR`;
+
+    // Ranked like a records board — best OVR first, not just newest-saved.
+    const ranked = [...history].sort((a, b) => b.finalOvr - a.finalOvr);
+
+    container.innerHTML = `<div class="history-list">${ranked
+      .map((rec, i) => {
+        const trophies = [...(rec.collectiveTitles || []), ...(rec.individualAwards || [])];
+        return `
+          <div class="history-card">
+            <div class="ovr-chip">${rec.finalOvr}</div>
+            <div class="name-block">
+              <div class="name">#${i + 1} · ${rec.lastName.toUpperCase()} · #${rec.number}</div>
+              <div class="sub">${rec.position} · ${clubName(rec.finalClubId)} · ${formatDate(rec.savedAt)}</div>
+            </div>
+            <div class="stat-block"><div class="val">${rec.totalGoals}</div><div class="lab">Goals</div></div>
+            <div class="stat-block"><div class="val">${rec.totalAssists}</div><div class="lab">Assists</div></div>
+            <div class="stat-block"><div class="val">€${rec.peakValueM}M</div><div class="lab">Peak Value</div></div>
+            <div class="legacy-tag">${rec.legacyTier}</div>
+            <button class="delete-btn" data-id="${rec.id}">Delete</button>
+            ${trophies.length ? `<div class="trophy-line">${trophies.join(" · ")}</div>` : ""}
+          </div>`;
+      })
+      .join("")}</div>`;
+
+    container.querySelectorAll(".delete-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        deleteCareerRecord(btn.dataset.id);
+        render();
+      });
+    });
+  }
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    if (confirm("Clear all saved career history? This can't be undone.")) {
+      clearCareerHistory();
+      render();
+    }
+  });
+
+  document.getElementById("newCareerBtn").addEventListener("click", () => {
+    window.location.href = dir + "characterCreation.html";
+  });
+
+  render();
+</script>
+
+</body>
+</html>

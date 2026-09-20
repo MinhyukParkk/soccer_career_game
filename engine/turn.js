@@ -48,6 +48,8 @@ export async function runTurn(player, turnLength = 2, chooseFn = autoChoose) {
   let lastEventId = null;
   let lastChoiceId = null;
   const totalSeason = { matches: 0, goals: 0, assists: 0 };
+  const wonTrophies = [];
+  const wonAwards = [];
 
   for (let s = 0; s < turnLength; s++) {
     player.age += 1;
@@ -99,12 +101,18 @@ export async function runTurn(player, turnLength = 2, chooseFn = autoChoose) {
     // Whether the club actually wins something this season — the real
     // difference between playing for a giant and playing for a minnow.
     const trophyResult = rollSeasonTrophy(player, clubs);
-    if (trophyResult) resultParts.push(trophyResult);
+    if (trophyResult) {
+      resultParts.push(trophyResult.resultText);
+      wonTrophies.push(trophyResult.label);
+    }
 
     // Personal recognition for a standout individual season, separate
     // from whatever the club did collectively.
     const awardResult = rollSeasonAwards(player, clubs, seasonStats.goals);
-    if (awardResult) resultParts.push(awardResult);
+    if (awardResult) {
+      resultParts.push(awardResult.resultText);
+      wonAwards.push(...awardResult.labels);
+    }
   }
 
   return {
@@ -112,6 +120,8 @@ export async function runTurn(player, turnLength = 2, chooseFn = autoChoose) {
     choice: lastChoiceId,
     resultText: resultParts.length ? resultParts.join(" ") : null,
     season: totalSeason,
+    wonTrophies,
+    wonAwards,
   };
 }
 

@@ -82,7 +82,7 @@
     <div class="logo"><span class="mark">⬢</span> CLUB CARRERA</div>
     <div class="links">
       <a href="#" class="current">Career</a>
-      <a href="#">Leaderboards</a>
+      <a href="history.html">History</a>
       <a href="#">How It Works</a>
       <a href="#">Blog</a>
     </div>
@@ -114,7 +114,9 @@
     <div class="trophy-cabinet" id="trophyCabinet">Empty Trophy Case</div>
 
     <div class="footer-actions">
-      <button class="back-btn" id="playAgainBtn">Play Again</button>
+      <button class="back-btn" id="viewHistoryBtn">View Career History</button>
+      <button class="back-btn" id="saveHistoryBtn">Save This Career</button>
+      <button class="kickoff-btn" id="playAgainBtn">Play Again</button>
     </div>
 
   </div>
@@ -126,14 +128,15 @@
 
 <script type="module">
   import { generateSummary } from "../engine/summary.js";
-  import { computeMarketValue } from "../engine/rating.js";
+  import { computeMarketValue, computeOverall } from "../engine/rating.js";
   import clubs from "../data/clubs.js";
+  import { saveCareerRecord } from "./careerHistory.js";
 
   const saved = sessionStorage.getItem("clubCarreraPlayer");
   const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
   if (!saved) {
     console.warn("No player found — redirecting to character creation.");
-    window.location.href = dir + "character_creation.html";
+    window.location.href = dir + "characterCreation.html";
   }
   const player = JSON.parse(saved);
   const summary = generateSummary(player);
@@ -179,9 +182,45 @@
     ? trophies.join(" · ")
     : "Empty Trophy Case";
 
+  // Saving is the player's choice — nothing is written to history until
+  // they explicitly click "Save This Career".
+  function buildCareerRecord() {
+    return {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      savedAt: Date.now(),
+      lastName: player.identity.lastName,
+      number: player.identity.number,
+      position: player.identity.position,
+      country: player.identity.country,
+      finalAge: player.age,
+      finalOvr: computeOverall(player),
+      legacyTier: summary.legacyTier,
+      totalMatches: summary.totalMatches,
+      totalGoals: summary.totalGoals,
+      totalAssists: summary.totalAssists,
+      internationalCaps: summary.internationalCaps,
+      peakValueM: computeMarketValue(player),
+      finalClubId: player.career.currentClub,
+      clubsCount: summary.clubStints.length,
+      collectiveTitles: summary.collectiveTitles,
+      individualAwards: summary.individualAwards,
+    };
+  }
+
+  const saveBtn = document.getElementById("saveHistoryBtn");
+  saveBtn.addEventListener("click", () => {
+    const ok = saveCareerRecord(buildCareerRecord());
+    saveBtn.textContent = ok ? "Saved ✓" : "Save Failed";
+    saveBtn.disabled = true;
+  });
+
   document.getElementById("playAgainBtn").addEventListener("click", () => {
     sessionStorage.removeItem("clubCarreraPlayer");
-    window.location.href = dir + "character_creation.html";
+    window.location.href = dir + "characterCreation.html";
+  });
+
+  document.getElementById("viewHistoryBtn").addEventListener("click", () => {
+    window.location.href = dir + "history.html";
   });
 </script>
 
