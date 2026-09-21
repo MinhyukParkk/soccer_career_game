@@ -51,7 +51,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`\nClub Carrera is running:`);
+  console.log(`\nCareer Manager is running:`);
   console.log(`  http://localhost:${PORT}\n`);
   console.log(`Serving files from: ${ROOT}\n`);
   console.log(`In Codespaces: check the "Ports" tab and open port ${PORT} in the browser.\n`);

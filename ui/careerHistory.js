@@ -2,7 +2,7 @@
 // sessionStorage, this survives closing the tab). Used by summary.html
 // (saves a record when a career ends) and history.html (lists them).
 
-const STORAGE_KEY = "clubCarreraHistory";
+const STORAGE_KEY = "careerManagerHistory";
 
 export function getCareerHistory() {
   try {

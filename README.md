@@ -1,4 +1,4 @@
-# Club Carrera
+# Career Manager
 
 A browser-based (and terminal-based) football career simulator — play through a
 career from a 17-year-old academy prospect to retirement, making decisions

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Club Carrera — Career Complete</title>
+<title>Career Manager — Career Complete</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
@@ -79,7 +79,7 @@
 <body>
 
   <nav class="site-nav">
-    <div class="logo"><span class="mark">⬢</span> CLUB CARRERA</div>
+    <div class="logo"><span class="mark">⬢</span> CAREER MANAGER</div>
     <div class="links">
       <a href="#" class="current">Career</a>
       <a href="history.html">History</a>
@@ -122,7 +122,7 @@
   </div>
 
   <div class="site-footer">
-    <span>Club Carrera · Sim Engine 0.1</span>
+    <span>Career Manager · Sim Engine 0.1</span>
     <span>Runs In Your Browser</span>
   </div>
 
@@ -132,7 +132,7 @@
   import clubs from "../data/clubs.js";
   import { saveCareerRecord } from "./careerHistory.js";
 
-  const saved = sessionStorage.getItem("clubCarreraPlayer");
+  const saved = sessionStorage.getItem("careerManagerPlayer");
   const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
   if (!saved) {
     console.warn("No player found — redirecting to character creation.");
@@ -215,7 +215,7 @@
   });
 
   document.getElementById("playAgainBtn").addEventListener("click", () => {
-    sessionStorage.removeItem("clubCarreraPlayer");
+    sessionStorage.removeItem("careerManagerPlayer");
     window.location.href = dir + "characterCreation.html";
   });
 
