@@ -1,86 +1,94 @@
-import { getPositionProfile } from "./positions.js";
+// The player: a fresh 17-year-old with a name, a shirt number, a
+// nationality and a position. Everything else (club, stats, honours) is
+// built up by the career itself.
+//
+// The whole object is plain JSON so the web UI can keep it in
+// sessionStorage between pages, and resume a career after a refresh.
 
-export function createPlayer({ lastName, number, preferredFoot, country, position }) {
-  // Base stats are generic; we then nudge them toward what actually
-  // matters for this position, so a CB and a ST don't start identical.
-  const baseStats = {
-    attack: 40,
-    defense: 20,
-    speed: 55,
-    stamina: 50,
-    technique: 45,
-    mental: 30,
-  };
+import { ATTRIBUTES, POSITION_PROFILES } from "./positions.js";
+import { adjustOverall, computeMarketValue, getOverall } from "./rating.js";
+import { getCountry } from "./nations.js";
+import { DEFAULT_PACE, PACES } from "./pace.js";
+import { rand, randInt } from "./random.js";
 
-  const { weights } = getPositionProfile(position);
+export const START_AGE = 17;
+export const PLAYER_VERSION = 2;
+export const MAX_NAME_LENGTH = 16;
+
+// Seasons start in July: in October 2026 the current season is 2026/27.
+export function currentSeasonStartYear(date = new Date()) {
+  return date.getMonth() >= 6 ? date.getFullYear() : date.getFullYear() - 1;
+}
+
+export function cleanLastName(raw) {
+  return String(raw ?? "")
+    .replace(/[^\p{L}\p{M}' .-]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_NAME_LENGTH);
+}
+
+const newId = () => `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+
+export function createPlayer({ lastName, number, preferredFoot, countryCode, position, pace, startYear }) {
+  const country = getCountry(countryCode) ?? getCountry("ENG");
+  const pos = POSITION_PROFILES[position] ? position : "ST";
+  const shirt = Math.min(99, Math.max(1, Math.round(Number(number) || 9)));
+  const season = startYear ?? currentSeasonStartYear();
+
   const stats = {};
-  for (const stat of Object.keys(baseStats)) {
-    const w = weights[stat] ?? 0;
-    let adjust = 0;
-    if (w >= 0.25) adjust = 8;
-    else if (w >= 0.15) adjust = 3;
-    else if (w === 0) adjust = -5;
-    stats[stat] = Math.max(1, Math.min(99, baseStats[stat] + adjust));
-  }
+  for (const key of ATTRIBUTES) stats[key] = Math.round(rand(34, 56));
 
-  // Rolled once per career and never shown to the player directly — this
-  // is what makes one career peak as a solid 65-70 OVR pro and another
-  // break out into a 90+ superstar, even with identical choices. Using
-  // three averaged rolls biases toward the middle (most careers are
-  // "pretty good") while still allowing real long-tail outcomes.
-  const talentRoll = (Math.random() + Math.random() + Math.random()) / 3;
-  const talent = 0.55 + talentRoll * 1.5; // roughly 0.55 (bust) to 2.05 (generational)
-
-  return {
-    identity: { lastName, number, preferredFoot, country, position },
-    age: 17,
-    development: { talent },
-    career: {
-      currentClub: null, // assigned via the academy-offer step at career start
-      parentClub: null, // set while out on loan; cleared automatically on return
-      loanReturnAge: null,
-      clubHistory: [],
-      loanHistory: [],
-      internationalCaps: 0,
+  const player = {
+    id: newId(),
+    version: PLAYER_VERSION,
+    identity: {
+      lastName: cleanLastName(lastName) || "Player",
+      number: shirt,
+      preferredFoot: preferredFoot === "left" ? "left" : "right",
+      country: country.name,
+      countryCode: country.code,
+      position: pos,
+    },
+    pace: PACES[pace] ? pace : DEFAULT_PACE,
+    age: START_AGE,
+    startYear: season,
+    season,
+    development: {
+      talent: 0.5 + (Math.random() + Math.random()) / 2,
+      peakShift: randInt(-1, 2),
     },
     stats,
-    condition: {
-      morale: 70,
-      injuryRiskModifier: 0,
-    },
-    flags: {
-      hasDoped: false,
-      hasRetiredEarly: false,
-      isCaptain: false,
-    },
-    seasonLog: {
-      matchesPlayed: 0,
-      goals: 0,
-      assists: 0,
-    },
+    career: { clubId: null, parentClubId: null, loanSeasonsLeft: 0, loanReturn: null },
+    status: { roleShift: null, unavailable: null, captain: false, nationalTeam: false },
+    recentEvents: [],
+    seenEvents: [],
     careerLog: {
-      totalMatches: 0,
-      totalGoals: 0,
-      totalAssists: 0,
-      collectiveTitles: [],
-      individualAwards: [],
-      // Per-club-stint breakdown, in chronological order. A new entry
-      // starts whenever currentClub differs from the most recent stint;
-      // consecutive seasons at the same club accumulate onto it. Filled in
-      // by engine/matchSim.js.
-      clubStints: [],
+      seasons: [],
+      stints: [],
+      honours: [],
+      transfers: [],
+      totals: { apps: 0, goals: 0, assists: 0, cleanSheets: 0, minutes: 0 },
+      intl: { caps: 0, goals: 0, debutSeason: null },
+      startOvr: 0,
+      peakOvr: 0,
+      peakOvrAge: START_AGE,
+      peakValue: 0,
+      peakValueAge: START_AGE,
     },
+    pending: null,
+    lastResult: null,
+    lastRecap: null,
+    retired: false,
+    retirement: null,
   };
+
+  adjustOverall(player, randInt(46, 52) - getOverall(player));
+  const ovr = getOverall(player);
+  player.careerLog.startOvr = ovr;
+  player.careerLog.peakOvr = ovr;
+  player.careerLog.peakValue = computeMarketValue(player, ovr);
+  return player;
 }
 
-// Dot-notation helpers, e.g. getByPath(player, "stats.attack")
-export function getByPath(obj, path) {
-  return path.split(".").reduce((o, k) => (o == null ? o : o[k]), obj);
-}
-
-export function setByPath(obj, path, value) {
-  const keys = path.split(".");
-  const last = keys.pop();
-  const target = keys.reduce((o, k) => o[k], obj);
-  target[last] = value;
-}
+export const fullName = (player) => player.identity.lastName;

@@ -1,91 +1,81 @@
-import { getPositionProfile } from "./positions.js";
-import { currentLeagueBaseline } from "./leagueLevels.js";
-import clubs from "../data/clubs.js";
+// One club season: playing time, goals, assists, clean sheets and where
+// the club finishes in the league.
+//
+// Output per 90 minutes = the position's base rate x qualityCurve, where
+// the curve compares your OVR with the average player in your league
+// (leagueLevels.js). Playing time comes from your squad role (squad.js).
+// The club you play for never changes how fast you develop.
 
-// Rough "how much this exact position contributes to goals/assists" —
-// each position now has its own factors (see positions.js) instead of a
-// coarse 4-group split. Not meant to be a realistic match engine — just
-// enough that a striker's stats visibly translate into goals, a winger's
-// into a mix of both, a center-back's into almost neither, etc.
+import { allClubs, getClub } from "./clubInfo.js";
+import { leagueBaseline } from "./leagueLevels.js";
+import { getPositionProfile, isGoalkeeper } from "./positions.js";
+import { clamp, rand, randInt, stochasticRound } from "./random.js";
+import { roleFor } from "./squad.js";
 
-function randRange(min, max) {
-  return min + Math.random() * (max - min);
+// 1.0 for a league-average player; about 2.3x when 15 above the league
+// average (a 90 in a top flight, a 70 in a second division) and about
+// 0.45x when 15 below it.
+export function qualityCurve(advantage) {
+  return Math.exp(clamp(advantage, -22, 20) * 0.055);
 }
 
-// A given stat means something different depending on how strong the
-// league around you is: an OVR-70 player is a dominant force in a
-// second-tier league (weak opposition), but only an average one in the
-// top flight — you need to be closer to 90 there to actually stand out.
-// So instead of a flat curve on the raw stat, we curve on the player's
-// advantage *relative to their current league's typical level*.
-function qualityCurve(statValue, leagueBaseline) {
-  const advantage = statValue - leagueBaseline; // how far above/below this league's level
-  const normalized = Math.max(0, (advantage + 20) / 45); // -20 rel. -> 0, +25 rel. -> 1
-  return Math.pow(normalized, 1.8) * 3.2; // steep: a real standout dwarfs an average pro
+// How much one player lifts (or drags down) the club's chances.
+const ROLE_INFLUENCE = { key: 0.35, starter: 0.25, rotation: 0.1, bench: 0.03 };
+
+export function effectiveStrength(club, ovr, roleId) {
+  const lift = clamp((ovr - club.requiredOvr) * ROLE_INFLUENCE[roleId], -3, 5);
+  return club.requiredOvr + lift;
 }
 
-// A new stint starts whenever the player's club differs from the most
-// recent one on record; consecutive seasons at the same club just
-// accumulate onto the existing entry (covers normal tenure, loan spells,
-// and moving back to a previous club as separate stints).
-function recordClubStint(player, clubId, matches, goals, assists) {
-  if (!clubId) return;
-  const stints = player.careerLog.clubStints;
-  const last = stints[stints.length - 1];
-  if (last && last.clubId === clubId) {
-    last.matches += matches;
-    last.goals += goals;
-    last.assists += assists;
-  } else {
-    stints.push({ clubId, matches, goals, assists });
-  }
+// Roughly normal noise with the given spread.
+const noise = (spread) => (Math.random() + Math.random() + Math.random() - 1.5) * 2 * spread;
+
+export function simulateLeagueFinish(club, strength) {
+  const table = allClubs()
+    .filter((c) => c.league === club.league)
+    .map((c) => ({ id: c.id, score: (c.id === club.id ? strength : c.requiredOvr) + noise(2.5) }))
+    .sort((a, b) => b.score - a.score);
+  return { position: table.findIndex((row) => row.id === club.id) + 1, size: table.length };
 }
 
-// Simulates `seasons` worth of league matches for the player based on
-// their stats, fitness, exact position, and the level of the league
-// they're currently playing in. Mutates player.seasonLog (this stretch's
-// numbers) and player.careerLog (running totals + per-club breakdown),
-// and returns the delta so the UI can show "this season: X apps, Y
-// goals, Z assists".
-export function simulateSeasons(player, seasons) {
-  const { goalFactor, assistFactor } = getPositionProfile(player.identity.position);
+export function simulateClubSeason(player, ovr) {
+  const club = getClub(player.career.clubId);
+  const role = roleFor(player, club.id, ovr);
+  const position = player.identity.position;
+  const profile = getPositionProfile(position);
 
-  let matches = 0;
-  let goals = 0;
-  let assists = 0;
+  let apps = randInt(role.apps[0], role.apps[1]);
+  const missedMonths = player.status.unavailable?.months ?? 0;
+  if (missedMonths) apps = Math.round(apps * (1 - Math.min(0.9, missedMonths / 10)));
 
-  for (let i = 0; i < seasons; i++) {
-    const seasonMatches = Math.round(randRange(18, 34));
-    const leagueBaseline = currentLeagueBaseline(player, clubs);
+  const minutes = Math.round(apps * role.minutesPerApp * rand(0.93, 1.05));
+  const full90s = minutes / 90;
+  const baseline = leagueBaseline(club.tier);
+  const quality = qualityCurve(ovr - baseline);
 
-    const attackQuality = qualityCurve(player.stats.attack, leagueBaseline);
-    const techMentalAvg = (player.stats.technique + player.stats.mental) / 2;
-    const creativeQuality = qualityCurve(techMentalAvg, leagueBaseline);
+  const goals = stochasticRound(full90s * profile.goalFactor * quality * rand(0.8, 1.2));
+  const assists = stochasticRound(full90s * profile.assistFactor * quality * rand(0.8, 1.2));
 
-    const seasonGoals = Math.round(
-      seasonMatches * goalFactor * attackQuality * randRange(0.7, 1.3)
-    );
-    const seasonAssists = Math.round(
-      seasonMatches * assistFactor * creativeQuality * randRange(0.7, 1.3)
-    );
-
-    matches += seasonMatches;
-    goals += seasonGoals;
-    assists += seasonAssists;
-
-    // Attribute this season's numbers to whichever club is current right
-    // now — callers run this once per season, after that season's transfer
-    // decision has already been applied, so currentClub is always accurate.
-    recordClubStint(player, player.career.currentClub, seasonMatches, seasonGoals, seasonAssists);
+  let cleanSheets = 0;
+  if (isGoalkeeper(position)) {
+    const rate = clamp(0.26 + 0.012 * (ovr - baseline) + 0.008 * (club.requiredOvr - baseline), 0.08, 0.6);
+    cleanSheets = Math.min(apps, stochasticRound(full90s * rate * rand(0.85, 1.15)));
   }
 
-  player.seasonLog.matchesPlayed = matches;
-  player.seasonLog.goals = goals;
-  player.seasonLog.assists = assists;
+  const strength = effectiveStrength(club, ovr, role.id);
+  const finish = simulateLeagueFinish(club, strength);
 
-  player.careerLog.totalMatches += matches;
-  player.careerLog.totalGoals += goals;
-  player.careerLog.totalAssists += assists;
-
-  return { matches, goals, assists };
+  return {
+    clubId: club.id,
+    roleId: role.id,
+    apps,
+    minutes,
+    goals,
+    assists,
+    cleanSheets,
+    strength,
+    finish,
+    missedMonths,
+    missedReason: player.status.unavailable?.reason ?? null,
+  };
 }

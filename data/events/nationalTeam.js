@@ -1,59 +1,59 @@
-// National team call-ups are gated by OVR now (a decent player gets
-// called up; a genuine star gets asked to captain the side) instead of an
-// abstract "fame" stat.
+// International football.
+
 export default [
   {
-    id: "evt_national_call",
-    category: "nationalTeam",
-    minAge: 20,
-    maxAge: 34,
-    weight: 5,
-    conditions: { minOvr: 62 },
-    text: "You've been called up to the national team. How do you prepare?",
+    id: "international_break",
+    category: "National team",
+    title: "Duty calls",
+    text: "{nation} call you up for a decisive qualifier, but you're carrying a knock.",
+    minAge: 18,
+    maxAge: 36,
+    weight: 8,
+    when: (ctx) => ctx.nationalTeam,
     choices: [
       {
-        id: "prepare_hard",
-        label: "Train intensely to make the starting XI",
-        effects: {
-          "stats.stamina": 2,
-          "career.internationalCaps": 1,
-        },
-        resultText: "You earned your first cap, and the fans noticed.",
+        id: "play",
+        label: "Play for {nation}",
+        hint: "You don't say no to your country.",
+        outcomes: [
+          { chance: 60, effects: { ovr: 2 }, text: "You play through it and score in a famous win." },
+          { chance: 40, effects: { ovr: -1, injury: 2 }, text: "The knock gets worse. Two months out." },
+        ],
       },
       {
-        id: "prepare_balanced",
-        label: "Rest and manage your energy",
-        effects: {
-          "condition.morale": 8,
-          "career.internationalCaps": 1,
-        },
-        resultText: "You made a solid, low-risk debut.",
+        id: "withdraw",
+        label: "Withdraw from the squad",
+        hint: "Protect your body.",
+        effects: {},
+        text: "You rest and recover. The national coach understands — this time.",
       },
     ],
   },
   {
-    id: "evt_national_captain",
-    category: "nationalTeam",
-    minAge: 25,
-    maxAge: 34,
-    weight: 2,
-    conditions: { minOvr: 78 },
-    text: "The coach considers naming you national team captain.",
+    id: "coach_watching",
+    category: "National team",
+    title: "Someone in the stands",
+    text: "The {nation} national coach is in the stands this month, and he's watching you.",
+    minAge: 19,
+    maxAge: 31,
+    weight: 9,
+    when: (ctx) => !ctx.nationalTeam && ctx.ovr >= ctx.callUp - 5,
     choices: [
       {
-        id: "accept_armband",
-        label: "Accept the responsibility",
-        effects: {
-          "flags.isCaptain": true,
-          "stats.mental": 6,
-        },
-        resultText: "You were named captain of your national team.",
+        id: "show_off",
+        label: "Raise your game",
+        hint: "Try to stand out.",
+        outcomes: [
+          { chance: 60, effects: { ovr: 2 }, text: "You play the games of your life. He takes notes." },
+          { chance: 40, effects: {}, text: "You try too hard and nothing comes off." },
+        ],
       },
       {
-        id: "defer_armband",
-        label: "Suggest a more experienced teammate instead",
-        effects: { "condition.morale": 6 },
-        resultText: "You stayed humble, and the squad respected the gesture.",
+        id: "stay_calm",
+        label: "Keep doing what you do",
+        hint: "Consistency is what coaches want.",
+        effects: { ovr: 1 },
+        text: "Solid, reliable, no drama. A good month.",
       },
     ],
   },

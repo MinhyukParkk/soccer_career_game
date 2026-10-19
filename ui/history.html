@@ -2,202 +2,217 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Career Manager — Career History</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="shared.css">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Career history · Career Manager</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 34'%3E%3Cpath d='M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z' fill='%231d1e19'/%3E%3Cpath d='M7 14l8 6 8-6' fill='none' stroke='%23a1282a' stroke-width='3'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
 <style>
-  /* Page-specific layout for the career history / archive list only. */
-
-  .header-row {
+  .toolbar {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 3px solid var(--ink);
-    padding: 34px 0 18px;
-  }
-  h1 { font-size: 44px; margin: 6px 0 0; }
-  .kicker { font-size: 12px; letter-spacing: 0.14em; color: var(--ink-dim); text-transform: uppercase; }
-
-  .history-list { display: flex; flex-direction: column; gap: 14px; padding: 30px 0; }
-
-  .history-card {
-    border: 1.5px solid var(--ink);
-    padding: 18px 22px;
-    display: grid;
-    grid-template-columns: 60px 1.3fr 1fr 1fr 1fr auto auto;
-    gap: 18px;
     align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 22px 0 18px;
   }
-  .history-card .ovr-chip {
-    background: var(--red); color: var(--paper);
-    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
-    width: 52px; height: 52px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
+  .toolbar .count { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); }
+  .toolbar .right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .sort { display: flex; align-items: center; gap: 8px; }
+  .sort select {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--paper-3);
+    border: 1.5px solid var(--ink);
+    padding: 7px 10px;
+    color: var(--ink);
+    border-radius: 0;
   }
-  .history-card .name-block .name { font-family: 'Bebas Neue', sans-serif; font-size: 19px; }
-  .history-card .name-block .sub { font-size: 11.5px; color: var(--ink-dim); }
-  .history-card .stat-block { text-align: center; }
-  .history-card .stat-block .val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; }
-  .history-card .stat-block .lab { font-size: 10px; letter-spacing: 0.06em; color: var(--ink-faint); text-transform: uppercase; }
-  .history-card .legacy-tag {
-    border: 1.5px solid var(--red); color: var(--red);
-    font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.05em;
-    padding: 5px 10px; text-align: center; text-transform: uppercase; white-space: nowrap;
-  }
-  .history-card .trophy-line {
-    grid-column: 1 / -1;
-    font-size: 11.5px; color: var(--ink-dim); font-style: italic;
-    border-top: 1px dotted var(--ink-faint); padding-top: 10px; margin-top: 4px;
-  }
-  .history-card .delete-btn {
-    border: 1.5px solid var(--ink-faint); background: transparent; color: var(--ink-dim);
-    font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.05em;
-    padding: 8px 12px; cursor: pointer; white-space: nowrap;
-  }
-  .history-card .delete-btn:hover { border-color: var(--red); color: var(--red); }
 
-  .empty-state {
-    border: 1.5px dashed var(--ink-faint);
-    padding: 60px 20px;
-    text-align: center;
-    color: var(--ink-dim);
+  .records { display: grid; gap: 16px; }
+  .record {
+    display: grid;
+    grid-template-columns: 56px auto minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: start;
+    padding: 18px 20px;
   }
-  .empty-state .big { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--ink); margin-bottom: 8px; }
+  .rank { font-family: var(--font-display); font-size: 52px; line-height: 0.9; color: var(--red); text-align: center; }
+  .rank.top { color: var(--gold); }
+  .record .ovr { min-width: 74px; }
+  .rec-main { min-width: 0; }
+  .rec-name { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .rec-name b { font-family: var(--font-display); font-weight: 400; font-size: 32px; letter-spacing: 0.03em; line-height: 1; }
+  .rec-name .legacy { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--paper); background: var(--red); padding: 2px 7px; }
+  .rec-meta { font-size: 14px; color: var(--ink-2); margin-top: 4px; }
+  .rec-stats { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 12px; }
+  .rec-stats div b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1; }
+  .rec-stats div span { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .rec-honours { margin-top: 12px; }
+  .rec-clubs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .rec-clubs .crest { --size: 30px; border-width: 1.5px; }
+  .rec-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .rec-side .saved { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+  .delete-btn { font-size: 15px; padding: 8px 14px 6px; }
+  .delete-btn:hover { background: var(--red); color: var(--paper); border-color: var(--red); }
 
-  .footer-actions { display: flex; justify-content: center; gap: 14px; padding: 20px 0 50px; }
-
-  @media (max-width: 900px) {
-    .history-card { grid-template-columns: 1fr 1fr; }
-    .history-card .ovr-chip { grid-row: span 2; }
+  @media (max-width: 760px) {
+    .record { grid-template-columns: auto minmax(0, 1fr); gap: 14px; }
+    .rank { font-size: 40px; grid-row: span 1; }
+    .record .ovr { grid-column: 2; grid-row: 1; justify-self: end; }
+    .rec-main { grid-column: 1 / -1; }
+    .rec-side { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
   }
 </style>
 </head>
 <body>
 
-  <nav class="site-nav">
-    <div class="logo"><span class="mark">⬢</span> CAREER MANAGER</div>
-    <div class="links">
-      <a href="characterCreation.html">Career</a>
-      <a href="history.html" class="current">History</a>
-      <a href="#">How It Works</a>
-      <a href="#">Blog</a>
-    </div>
-    <div class="auth">
-      <a href="#">Log in</a>
-      <a href="#" class="signup">Sign up</a>
-    </div>
-  </nav>
-
-  <div class="subnav">
-    <span>Career Sim / History</span>
-    <span id="countLabel">— careers</span>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="home.html" aria-label="Career Manager home">
+      <svg viewBox="0 0 30 34" aria-hidden="true"><path d="M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z" fill="none" stroke="#efe8d6" stroke-width="2"/><path d="M7 14l8 6 8-6" fill="none" stroke="#a1282a" stroke-width="3"/><circle cx="15" cy="9" r="2.2" fill="#efe8d6"/></svg>
+      Career Manager
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="characterCreation.html">New career</a>
+      <a href="history.html" aria-current="page">History</a>
+    </nav>
   </div>
+</header>
 
-  <div class="page">
-
-    <div class="header-row">
-      <div>
-        <div class="kicker">Archive</div>
-        <h1>Career History</h1>
-      </div>
-      <div class="stamp" id="bestStamp">—</div>
+<main class="page">
+  <div class="masthead">
+    <div>
+      <div class="kicker">Saved careers</div>
+      <h1 class="title">Career history</h1>
+      <p class="lede">Every career you chose to keep, ranked by peak OVR. Stored in this browser only.</p>
     </div>
-
-    <div id="historyContainer"><!-- rendered by JS --></div>
-
-    <div class="footer-actions">
-      <button class="back-btn" id="clearBtn">Clear History</button>
-      <button class="kickoff-btn" id="newCareerBtn">Start New Career</button>
-    </div>
-
+    <div class="stamp" id="stamp">Archive</div>
   </div>
+  <div id="root"></div>
+</main>
 
-  <div class="site-footer">
-    <span>Career Manager · Sim Engine 0.1</span>
-    <span>Runs In Your Browser</span>
+<footer class="site-footer">
+  <div class="inner">
+    <span>Career Manager · a football career simulator</span>
+    <span>Club and league names are used for identification only. Not affiliated with any club or league.</span>
   </div>
+</footer>
 
 <script type="module">
-  import clubs from "../data/clubs.js";
-  import { getCareerHistory, clearCareerHistory, deleteCareerRecord } from "./careerHistory.js";
+  import { formatNumber, formatValue } from "../engine/format.js";
+  import { esc, crestHtml, ovrHtml, formatDate } from "./components.js";
+  import { clearCareerHistory, deleteCareerRecord, getCareerHistory } from "./careerHistory.js";
 
-  const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
+  const root = document.getElementById("root");
+  let sortBy = "peak";
 
-  function clubName(id) {
-    const club = clubs.find((c) => c.id === id);
-    return club ? club.name : "Unattached";
+  const SORTS = {
+    peak: (a, b) => (b.peakOvr ?? 0) - (a.peakOvr ?? 0) || (b.trophyCount ?? 0) - (a.trophyCount ?? 0),
+    trophies: (a, b) => (b.trophyCount ?? 0) - (a.trophyCount ?? 0) || (b.peakOvr ?? 0) - (a.peakOvr ?? 0),
+    goals: (a, b) => (b.totals?.goals ?? 0) - (a.totals?.goals ?? 0),
+    recent: (a, b) => String(b.savedAt ?? "").localeCompare(String(a.savedAt ?? "")),
+  };
+
+  function statsHtml(rec) {
+    const isGK = rec.position === "GK";
+    const t = rec.totals ?? {};
+    const cells = [
+      [formatNumber(t.apps ?? 0), "Apps"],
+      isGK ? [formatNumber(t.cleanSheets ?? 0), "Clean sh."] : [formatNumber(t.goals ?? 0), "Goals"],
+      [formatNumber(t.assists ?? 0), "Assists"],
+      [rec.intl?.caps ?? 0, "Caps"],
+      [rec.trophyCount ?? 0, "Trophies"],
+      [rec.awardCount ?? 0, "Awards"],
+    ];
+    if (rec.peakValue) cells.push([formatValue(rec.peakValue), "Peak value"]);
+    return cells.map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
   }
 
-  function formatDate(ts) {
-    return new Date(ts).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  function metaLine(rec) {
+    const parts = [rec.positionName || rec.position, rec.country];
+    if (rec.startYear && rec.endYear) parts.push(`${rec.startYear}–${rec.endYear}`);
+    if (rec.seasonsPlayed) parts.push(`${rec.seasonsPlayed} seasons`);
+    if (rec.retirementAge) parts.push(`retired at ${rec.retirementAge}`);
+    return parts.filter(Boolean).map(esc).join(" · ");
   }
 
   function render() {
-    const history = getCareerHistory();
-    const container = document.getElementById("historyContainer");
-    const countLabel = document.getElementById("countLabel");
-    const bestStamp = document.getElementById("bestStamp");
+    const records = getCareerHistory().sort(SORTS[sortBy]);
+    document.getElementById("stamp").textContent = `${records.length} saved`;
 
-    countLabel.textContent = `${history.length} career${history.length === 1 ? "" : "s"}`;
-
-    if (history.length === 0) {
-      bestStamp.textContent = "—";
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="big">No careers saved yet</div>
-          <div>Finish a career and it'll show up here.</div>
+    if (!records.length) {
+      root.innerHTML = `
+        <div class="empty" style="margin-top:30px">
+          <div class="big">No saved careers yet</div>
+          Finish a career and press "Save to history" on its summary page.
+          <div class="actions" style="justify-content:center;margin-top:18px"><a class="btn btn-primary" href="characterCreation.html">Start a new career</a></div>
         </div>`;
       return;
     }
 
-    const best = history.reduce((a, b) => (b.finalOvr > a.finalOvr ? b : a));
-    bestStamp.textContent = `Best: ${best.finalOvr} OVR`;
-
-    // Ranked like a records board — best OVR first, not just newest-saved.
-    const ranked = [...history].sort((a, b) => b.finalOvr - a.finalOvr);
-
-    container.innerHTML = `<div class="history-list">${ranked
-      .map((rec, i) => {
-        const trophies = [...(rec.collectiveTitles || []), ...(rec.individualAwards || [])];
-        return `
-          <div class="history-card">
-            <div class="ovr-chip">${rec.finalOvr}</div>
-            <div class="name-block">
-              <div class="name">#${i + 1} · ${rec.lastName.toUpperCase()} · #${rec.number}</div>
-              <div class="sub">${rec.position} · ${clubName(rec.finalClubId)} · ${formatDate(rec.savedAt)}</div>
+    root.innerHTML = `
+      <div class="toolbar">
+        <span class="count">${records.length} career${records.length === 1 ? "" : "s"}</span>
+        <div class="right">
+          <label class="sort"><span class="label" style="margin:0">Sort by</span>
+            <select id="sortSelect">
+              <option value="peak">Peak OVR</option>
+              <option value="trophies">Trophies</option>
+              <option value="goals">Goals</option>
+              <option value="recent">Most recent</option>
+            </select>
+          </label>
+          <button type="button" class="btn-link" id="clearBtn">Delete all</button>
+        </div>
+      </div>
+      <div class="records">${records
+        .map(
+          (rec, i) => `
+          <article class="card record">
+            <div class="rank ${i === 0 && sortBy === "peak" ? "top" : ""}">${i + 1}</div>
+            ${ovrHtml(rec.peakOvr ?? 0)}
+            <div class="rec-main">
+              <div class="rec-name"><b>${esc(String(rec.name).toUpperCase())}</b>${rec.number ? `<span class="muted">#${rec.number}</span>` : ""}${rec.legacy?.label ? `<span class="legacy">${esc(rec.legacy.label)}</span>` : ""}</div>
+              <div class="rec-meta">${metaLine(rec)}</div>
+              <div class="rec-stats">${statsHtml(rec)}</div>
+              ${rec.topHonours?.length ? `<div class="rec-honours">${rec.topHonours.map((h) => `<span class="honour ${h.kind === "award" ? "award" : "trophy"}">${esc(h.name)}${h.count > 1 ? " ×" + h.count : ""}</span>`).join("")}</div>` : ""}
+              ${rec.clubs?.length ? `<div class="rec-clubs" aria-label="Clubs">${rec.clubs.map((c) => `<span title="${esc(c.name)}">${crestHtml(c, 30)}</span>`).join("")}</div>` : ""}
             </div>
-            <div class="stat-block"><div class="val">${rec.totalGoals}</div><div class="lab">Goals</div></div>
-            <div class="stat-block"><div class="val">${rec.totalAssists}</div><div class="lab">Assists</div></div>
-            <div class="stat-block"><div class="val">€${rec.peakValueM}M</div><div class="lab">Peak Value</div></div>
-            <div class="legacy-tag">${rec.legacyTier}</div>
-            <button class="delete-btn" data-id="${rec.id}">Delete</button>
-            ${trophies.length ? `<div class="trophy-line">${trophies.join(" · ")}</div>` : ""}
-          </div>`;
-      })
-      .join("")}</div>`;
+            <div class="rec-side">
+              ${rec.savedAt ? `<span class="saved">Saved ${esc(formatDate(rec.savedAt))}</span>` : ""}
+              <button type="button" class="btn delete-btn" data-delete="${esc(rec.id)}" data-name="${esc(rec.name)}">Delete</button>
+            </div>
+          </article>`,
+        )
+        .join("")}</div>`;
 
-    container.querySelectorAll(".delete-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        deleteCareerRecord(btn.dataset.id);
+    const select = document.getElementById("sortSelect");
+    select.value = sortBy;
+    select.addEventListener("change", () => {
+      sortBy = select.value;
+      render();
+    });
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if (confirm(`Delete all ${records.length} saved careers? This can't be undone.`)) {
+        clearCareerHistory();
         render();
-      });
+      }
     });
   }
 
-  document.getElementById("clearBtn").addEventListener("click", () => {
-    if (confirm("Clear all saved career history? This can't be undone.")) {
-      clearCareerHistory();
+  root.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-delete]");
+    if (!btn) return;
+    if (confirm(`Delete ${btn.dataset.name}'s career from history?`)) {
+      deleteCareerRecord(btn.dataset.delete);
       render();
     }
   });
 
-  document.getElementById("newCareerBtn").addEventListener("click", () => {
-    window.location.href = dir + "characterCreation.html";
-  });
-
   render();
 </script>
-
 </body>
 </html>

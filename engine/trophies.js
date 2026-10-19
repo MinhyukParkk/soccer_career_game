@@ -1,46 +1,73 @@
-// Tier 1 and Tier 2 clubs were only ever different in "how good do I need
-// to be to sign here" (requiredOvr) — nothing made them feel different
-// once you were actually there. This is what does: every season, the
-// player's current club has a real shot at a trophy, and how big that
-// shot is depends entirely on how big the club is. A giant like Real
-// Madrid winning a title most years feels very different from a second
-// division side occasionally getting promoted, even for the same player.
+// Club trophies: league title, domestic cup and European cups.
+//
+// The league title goes to whoever tops the simulated table. Cups are a
+// weighted draw where stronger clubs (and clubs with a star player) are
+// more likely to win, but upsets happen. Every trophy uses its real name.
 
-function trophyProfileFor(club) {
-  if (!club) return null;
-  if (club.requiredOvr >= 85) {
-    return { chance: 0.3, label: `${club.league} Champions` };
-  }
-  if (club.tier === 1) {
-    return { chance: 0.1, label: `${club.league} Cup` };
-  }
-  return { chance: 0.03, label: `${club.league} Promotion` };
+import { allClubs } from "./clubInfo.js";
+import { DOMESTIC_CUP } from "./leagueLevels.js";
+import { chance } from "./random.js";
+
+const CUP_STEEPNESS = 0.2;
+const EUROPE_STEEPNESS = 0.3;
+
+// The usual European field: the four strongest clubs of each top flight
+// play the Champions League, the next four the Europa League.
+function europeanField(fromRank, toRank) {
+  const leagues = [...new Set(allClubs().filter((c) => c.tier === 1).map((c) => c.league))];
+  return leagues.flatMap((league) =>
+    allClubs()
+      .filter((c) => c.league === league)
+      .sort((a, b) => b.requiredOvr - a.requiredOvr)
+      .slice(fromRank - 1, toRank),
+  );
 }
 
-function addTrophy(player, label) {
-  const titles = player.careerLog.collectiveTitles;
-  const existingIndex = titles.findIndex((t) => t.startsWith(label + " x"));
-  if (existingIndex === -1) {
-    titles.push(`${label} x1`);
-  } else {
-    const count = parseInt(titles[existingIndex].split(" x")[1], 10) + 1;
-    titles[existingIndex] = `${label} x${count}`;
-  }
+const CHAMPIONS_FIELD = europeanField(1, 4);
+const EUROPA_FIELD = europeanField(5, 8);
+
+function drawWinChance(field, club, strength, steepness) {
+  const own = Math.exp(steepness * strength);
+  const others = field
+    .filter((c) => c.id !== club.id)
+    .reduce((sum, c) => sum + Math.exp(steepness * c.requiredOvr), 0);
+  return own / (own + others);
 }
 
-// Rolls this season's trophy chance for whichever club the player is
-// currently at. Returns { label, resultText } if something was won (label
-// is the clean trophy name, e.g. "La Liga Champions", for the UI to show
-// directly), or null otherwise (most seasons, for most clubs, win nothing
-// — that's the point: it should feel rare unless you're at a genuine giant).
-export function rollSeasonTrophy(player, clubs) {
-  const club = clubs.find((c) => c.id === player.career.currentClub);
-  const profile = trophyProfileFor(club);
-  if (!profile) return null;
+function cupWinChance(club, strength) {
+  const field = allClubs().filter((c) => c.country === club.country);
+  return drawWinChance(field, club, strength, CUP_STEEPNESS);
+}
 
-  if (Math.random() < profile.chance) {
-    addTrophy(player, profile.label);
-    return { label: profile.label, resultText: `${club.name} won the ${profile.label}!` };
+// clubSeason comes from simulateClubSeason (club, finish, strength).
+export function rollClubTrophies(club, clubSeason) {
+  const won = [];
+  const { finish, strength } = clubSeason;
+
+  if (finish.position === 1) won.push({ name: club.league, short: club.league, kind: "league" });
+
+  if (chance(cupWinChance(club, strength))) {
+    const cup = DOMESTIC_CUP[club.country];
+    won.push({ name: cup, short: cup, kind: "cup" });
   }
+
+  if (club.tier === 1 && finish.position <= 4) {
+    if (chance(drawWinChance(CHAMPIONS_FIELD, club, strength, EUROPE_STEEPNESS))) {
+      won.push({ name: "Champions League", short: "Champions League", kind: "europe" });
+    }
+  } else if (club.tier === 1 && finish.position <= 6) {
+    if (chance(drawWinChance(EUROPA_FIELD, club, strength, EUROPE_STEEPNESS))) {
+      won.push({ name: "Europa League", short: "Europa League", kind: "europe" });
+    }
+  }
+
+  return won;
+}
+
+// Which European competition the finish implies, for the season row.
+export function europeanCompetition(club, position) {
+  if (club.tier !== 1) return null;
+  if (position <= 4) return "Champions League";
+  if (position <= 6) return "Europa League";
   return null;
 }

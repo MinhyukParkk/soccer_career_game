@@ -2,438 +2,680 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Career Manager — Career</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="shared.css">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Career · Career Manager</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 34'%3E%3Cpath d='M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z' fill='%231d1e19'/%3E%3Cpath d='M7 14l8 6 8-6' fill='none' stroke='%23a1282a' stroke-width='3'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
 <style>
-  /* Page-specific layout for the main game screen only.
-     Shared tokens, nav, footer, buttons, and section titles live in shared.css. */
-
-  .game-grid {
+  /* ---------- player band */
+  .band {
     display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: 30px;
-    padding: 30px 0 50px;
-    align-items: start;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    gap: 26px;
+    align-items: center;
+    padding: 30px 0 24px;
+    border-bottom: 3px double var(--ink);
   }
-  .left-col { display: flex; flex-direction: column; gap: 24px; }
+  .shirt {
+    width: 84px;
+    height: 84px;
+    display: grid;
+    place-items: center;
+    background: var(--red);
+    color: var(--paper);
+    border: 1.5px solid var(--ink);
+    box-shadow: var(--shadow);
+    font-family: var(--font-display);
+    font-size: 54px;
+    line-height: 1;
+    padding-top: 6px;
+  }
+  .who h1 {
+    margin: 4px 0 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    overflow-wrap: anywhere;
+  }
+  .who .meta { margin-top: 8px; font-size: 14.5px; color: var(--ink-2); }
+  .club-now { display: flex; align-items: center; gap: 14px; padding-left: 26px; border-left: 1px solid var(--line); min-width: 0; }
+  .club-now .crest { --size: 58px; }
+  .club-now b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 25px; letter-spacing: 0.03em; line-height: 1; }
+  .club-now .sub { font-size: 13px; color: var(--ink-2); margin: 3px 0 5px; }
+  .club-now .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .armband { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; border: 1.5px solid var(--ink); padding: 1px 6px; }
+  .ovr-block { display: flex; align-items: center; gap: 16px; }
+  .ovr-block .ovr { min-width: 82px; }
+  .ovr-block .ovr .num { font-size: 56px; }
+  .value { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); line-height: 1.5; text-align: right; }
+  .value b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: 0.03em; color: var(--ink); line-height: 1; }
 
-  /* --- Player card --- */
-  .player-card { border: 1.5px solid var(--ink); padding: 22px; }
-  .player-card-top { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
-  .ovr-badge {
-    background: var(--red); color: var(--paper);
-    font-family: 'Bebas Neue', sans-serif; font-size: 30px;
-    width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    position: relative;
-    transition: transform 0.25s ease;
-  }
-  .ovr-badge.bump-up { animation: ovr-pulse-up 0.7s ease; }
-  .ovr-badge.bump-down { animation: ovr-pulse-down 0.7s ease; }
-  @keyframes ovr-pulse-up {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139,42,42,0.5); }
-    35% { transform: scale(1.22); box-shadow: 0 0 0 8px rgba(139,42,42,0.15); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139,42,42,0); }
-  }
-  @keyframes ovr-pulse-down {
-    0% { transform: scale(1); }
-    35% { transform: scale(0.88); filter: grayscale(0.4); }
-    100% { transform: scale(1); filter: grayscale(0); }
-  }
-  .ovr-delta-float {
-    position: absolute; top: -6px; right: -10px;
-    font-family: 'Bebas Neue', sans-serif; font-size: 15px;
-    padding: 2px 7px; border-radius: 10px;
-    background: var(--paper); border: 1.5px solid var(--ink);
-    animation: ovr-float-up 1.4s ease forwards;
-    pointer-events: none;
-  }
-  .ovr-delta-float.positive { color: var(--red); border-color: var(--red); }
-  .ovr-delta-float.negative { color: var(--ink-dim); }
-  @keyframes ovr-float-up {
-    0% { opacity: 0; transform: translateY(6px) scale(0.8); }
-    20% { opacity: 1; transform: translateY(-2px) scale(1.05); }
-    75% { opacity: 1; transform: translateY(-18px) scale(1); }
-    100% { opacity: 0; transform: translateY(-30px) scale(0.95); }
-  }
-  .player-name-block .name { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.02em; }
-  .player-name-block .sub { font-size: 12.5px; color: var(--ink-dim); }
-  .player-meta-row {
-    display: grid; grid-template-columns: 1fr 1fr;
-    border-top: 1px dotted var(--ink-faint); border-bottom: 1px dotted var(--ink-faint);
-    padding: 12px 0; margin-bottom: 14px;
-  }
-  .player-meta-row div { text-align: center; }
-  .player-meta-row .val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
-  .player-meta-row .lab { font-size: 10.5px; letter-spacing: 0.08em; color: var(--ink-faint); text-transform: uppercase; }
+  /* ---------- progress */
+  .progress { padding: 16px 0 6px; }
+  .progress-top { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  .progress-top b { color: var(--ink); }
+  .segments { display: grid; gap: 3px; }
+  .segments span { height: 10px; background: rgba(29, 30, 25, 0.1); }
+  .segments span.done { background: var(--ink); }
+  .segments span.now { background: var(--red); }
 
-  .trophy-box {
-    text-align: center; padding: 14px 0 4px;
-    font-size: 12px; color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase;
-  }
-  .season-box {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 12px; color: var(--ink-dim); letter-spacing: 0.03em;
-  }
-  .season-box-label { font-family: 'Bebas Neue', sans-serif; font-size: 12px; color: var(--red); letter-spacing: 0.05em; text-transform: uppercase; }
+  /* ---------- layout */
+  .game-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 30px; padding-top: 22px; align-items: start; }
+  .main-col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; min-width: 0; }
+  .side-col { display: grid; gap: 22px; position: sticky; top: 16px; }
 
-  /* --- Event / decision panel --- */
-  .event-panel { border: 1.5px solid var(--ink); padding: 24px; min-height: 220px; }
-  .event-eyebrow { font-size: 11px; letter-spacing: 0.12em; color: var(--red); text-transform: uppercase; margin-bottom: 8px; }
-  .event-headline { font-family: 'PT Serif', serif; font-size: 19px; line-height: 1.4; margin: 0 0 20px; }
-  .event-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
-  .event-choice {
-    border: 1.5px solid var(--ink); padding: 16px; cursor: pointer; background: var(--paper);
-  }
-  .event-choice:hover { background: var(--paper-dark); }
-  .event-choice .choice-label { font-family: 'Bebas Neue', sans-serif; font-size: 16px; margin-bottom: 6px; }
-  .choice-subtext { font-size: 11px; color: var(--ink-faint); margin-bottom: 10px; }
-  .choice-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .choice-tag {
-    font-size: 11px; border: 1px solid var(--ink-faint); padding: 3px 8px; color: var(--ink-dim);
-  }
-  .choice-tag.positive { border-color: var(--red); color: var(--red); }
+  /* ---------- decision card */
+  .decision { padding: 0; }
+  .decision-head { padding: 22px 24px 18px; border-bottom: 1.5px solid var(--ink); background: var(--paper-2); }
+  .decision-head h2 { margin: 6px 0 0; font-family: var(--font-display); font-weight: 400; font-size: 38px; letter-spacing: 0.02em; line-height: 1; }
+  .decision-head p { margin: 8px 0 0; color: var(--ink-2); max-width: 720px; }
+  .decision-body { padding: 22px 24px 24px; }
 
-  /* Transfer-style choices (signing for a club) get a crest block instead
-     of a stat-delta tag — the club/league is the point, not a number. */
-  .event-choice.transfer-choice { text-align: center; }
-  .crest-block {
-    width: 56px; height: 56px; margin: 0 auto 12px;
-    border: 2px solid var(--red); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--red);
-    background: var(--paper);
+  .options { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .option {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+    background: var(--paper-3);
+    border: 1.5px solid var(--ink);
+    padding: 16px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
   }
-  .event-choice.transfer-choice .choice-label { margin-bottom: 2px; }
-  .event-choice.transfer-choice .choice-subtext { margin-bottom: 0; }
+  .option:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); }
+  .option:active { transform: translate(0, 0); box-shadow: 1px 1px 0 var(--ink); }
+  .option > span { display: block; }
+  .opt-top { display: flex !important; justify-content: space-between; align-items: center; gap: 8px; }
+  .opt-kind { font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .opt-deal { font-family: var(--font-mono); font-size: 12.5px; font-weight: 700; }
+  .opt-club { display: flex !important; align-items: center; gap: 12px; }
+  .opt-club .crest { --size: 50px; }
+  .opt-club b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 23px; letter-spacing: 0.03em; line-height: 1; }
+  .opt-club small { display: block; font-size: 12.5px; color: var(--ink-2); margin: 3px 0 2px; }
+  .opt-role { display: flex !important; align-items: center; gap: 8px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+  .opt-outcomes { border-top: 1px dotted var(--ink-3); padding-top: 10px; }
+  .opt-outcomes .label { margin-bottom: 6px; }
+  .outcome-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+  .opt-cta { margin-top: auto; padding-top: 10px; border-top: 1.5px solid var(--ink); font-family: var(--font-display); font-size: 18px; letter-spacing: 0.05em; color: var(--red); }
+  .option.is-stay { background: #f1ebdd; }
+  .option.is-retire { background: var(--ink); color: var(--paper); }
+  .option.is-retire .opt-kind { color: #b9b096; }
+  .option.is-retire .opt-cta { color: #ecc659; border-top-color: rgba(239, 232, 214, 0.4); }
+  .option.is-retire .retire-title { font-family: var(--font-display); font-size: 30px; line-height: 0.95; letter-spacing: 0.02em; }
+  .option.is-retire .retire-text { font-size: 14px; color: #ddd4bb; }
 
-  /* --- Timeline --- */
-  .timeline-panel { border: 1.5px solid var(--ink); padding: 0; max-height: 640px; overflow-y: auto; }
-  table.timeline-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  table.timeline-table thead th {
-    position: sticky; top: 0; background: var(--paper-dark);
-    text-align: left; font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.06em;
-    padding: 10px 14px; border-bottom: 1.5px solid var(--ink);
-  }
-  table.timeline-table td { padding: 9px 14px; border-bottom: 1px dotted var(--ink-faint); }
-  table.timeline-table tr.current-row td { background: var(--paper-dark); font-weight: 700; }
-  table.timeline-table td.age-cell { font-family: 'Bebas Neue', sans-serif; }
-  .honour-tag {
-    font-family: 'Bebas Neue', sans-serif; font-size: 10.5px; letter-spacing: 0.05em;
-    text-transform: uppercase; border: 1.5px solid var(--ink); color: var(--ink-dim);
-    padding: 2px 7px; margin-right: 5px; display: inline-block;
-  }
-  .honour-tag.trophy { border-color: var(--red); color: var(--red); }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .choice-label { font-family: var(--font-display); font-size: 25px; letter-spacing: 0.03em; line-height: 1; }
+  .choice-hint { font-size: 14px; color: var(--ink-2); font-style: italic; }
 
-  @media (max-width: 1000px) {
-    .game-grid { grid-template-columns: 1fr; }
-    .event-choices { grid-template-columns: 1fr; }
+  .results { display: grid; gap: 12px; }
+  .result { display: grid; grid-template-columns: 4px 1fr; gap: 14px; }
+  .result::before { content: ""; background: var(--ink); }
+  .result.event::before { background: var(--red); }
+  .result p { margin: 3px 0 7px; font-size: 16.5px; }
+  .play-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1.5px solid var(--ink);
+  }
+  .next-up { display: flex; align-items: center; gap: 12px; }
+  .next-up .crest { --size: 42px; }
+  .next-up b { font-family: var(--font-display); font-weight: 400; font-size: 22px; letter-spacing: 0.03em; display: block; line-height: 1; }
+  .next-up div span { font-size: 13.5px; color: var(--ink-2); }
+
+  .sim { padding: 34px 24px 30px; text-align: center; }
+  .sim .big { font-family: var(--font-display); font-size: 64px; line-height: 1; letter-spacing: 0.02em; margin: 8px 0 14px; }
+  .sim-bar { height: 8px; background: rgba(29, 30, 25, 0.12); max-width: 420px; margin: 0 auto; }
+  .sim-bar span { display: block; height: 100%; background: var(--red); width: 0; transition: width 0.6s linear; }
+  .sim-lines { margin: 18px auto 0; max-width: 520px; display: grid; gap: 6px; font-family: var(--font-mono); font-size: 13px; color: var(--ink-2); }
+
+  /* ---------- recap */
+  .recap { padding: 0; }
+  .recap-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 18px 24px 14px; border-bottom: 1.5px solid var(--ink); }
+  .recap-head h2 { margin: 4px 0 0; font-family: var(--font-display); font-weight: 400; font-size: 32px; letter-spacing: 0.02em; line-height: 1; }
+  .ovr-move { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 13px; color: var(--ink-2); }
+  .ovr-move .arrow { font-size: 18px; }
+  .recap table.data { font-size: 13.5px; }
+  .recap .table-flat { overflow-x: auto; }
+  .recap-notes { padding: 12px 24px 16px; display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--line); }
+  .recap-notes:empty { display: none; }
+
+  /* ---------- over */
+  .over-body { padding: 30px 24px; }
+  .over-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .over-top .stamp { font-size: 20px; }
+  .over-body h2 { margin: 6px 0 8px; font-family: var(--font-display); font-weight: 400; font-size: 48px; line-height: 0.95; letter-spacing: 0.02em; }
+  .over-body p { color: var(--ink-2); margin: 0 0 20px; font-size: 17px; }
+
+  /* ---------- side */
+  .side-card { padding: 18px 20px; }
+  .side-title { font-family: var(--font-display); font-weight: 400; font-size: 22px; letter-spacing: 0.04em; margin: 0 0 12px; border-bottom: 1.5px solid var(--ink); padding-bottom: 6px; }
+  .totals-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 10px; }
+  .totals-grid b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 32px; line-height: 1; }
+  .totals-grid span { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .cabinet { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .cabinet li { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; border-bottom: 1px dotted var(--line); padding-bottom: 5px; }
+  .cabinet li b { font-family: var(--font-mono); font-size: 13px; }
+  .cabinet .group { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); border: none; padding: 6px 0 0; }
+  .side-empty { font-size: 14px; color: var(--ink-3); font-style: italic; margin: 0; }
+
+  /* ---------- timeline */
+  .timeline { padding-top: 46px; }
+  #timeline td.honours { white-space: normal; min-width: 180px; }
+  #timeline .role-chip { font-size: 9.5px; padding: 2px 5px 1px; }
+  .finish-1 { color: #7a5a14; font-weight: 700; }
+
+  @media (max-width: 1080px) {
+    .band { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .club-now { grid-column: 1 / -1; grid-row: 2; border-left: none; padding-left: 0; border-top: 1px solid var(--line); padding-top: 16px; }
+    .game-grid { grid-template-columns: minmax(0, 1fr); }
+    .side-col { position: static; grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 680px) {
+    .band { grid-template-columns: auto minmax(0, 1fr); gap: 16px; }
+    .shirt { width: 64px; height: 64px; font-size: 40px; }
+    .ovr-block { grid-column: 1 / -1; justify-content: space-between; }
+    .value { text-align: left; }
+    .choices { grid-template-columns: 1fr; }
+    .side-col { grid-template-columns: 1fr; }
+    .decision-head, .decision-body { padding-left: 18px; padding-right: 18px; }
+    .decision-head h2 { font-size: 32px; }
   }
 </style>
 </head>
 <body>
 
-  <nav class="site-nav">
-    <div class="logo"><span class="mark">⬢</span> CAREER MANAGER</div>
-    <div class="links">
-      <a href="#" class="current">Career</a>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="home.html" aria-label="Career Manager home">
+      <svg viewBox="0 0 30 34" aria-hidden="true"><path d="M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z" fill="none" stroke="#efe8d6" stroke-width="2"/><path d="M7 14l8 6 8-6" fill="none" stroke="#a1282a" stroke-width="3"/><circle cx="15" cy="9" r="2.2" fill="#efe8d6"/></svg>
+      Career Manager
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="characterCreation.html">New career</a>
       <a href="history.html">History</a>
-      <a href="#">How It Works</a>
-      <a href="#">Blog</a>
-    </div>
-    <div class="auth">
-      <a href="#">Log in</a>
-      <a href="#" class="signup">Sign up</a>
-    </div>
-  </nav>
+    </nav>
+  </div>
+</header>
 
-  <div class="subnav">
-    <span>Career Sim / In Progress</span>
-    <span id="seasonLabel">Season —</span>
+<main class="page">
+  <section class="band" id="band" aria-label="Player"></section>
+  <div class="progress" id="progress"></div>
+
+  <div class="game-grid">
+    <div class="main-col">
+      <div id="recapSlot"></div>
+      <section class="card decision" id="decision" aria-live="polite"></section>
+    </div>
+    <aside class="side-col">
+      <section class="card side-card" id="totals" aria-label="Career totals"></section>
+      <section class="card side-card" id="cabinet" aria-label="Honours"></section>
+    </aside>
   </div>
 
-  <div class="page">
-    <div class="game-grid">
+  <section class="timeline">
+    <h2 class="section-title">Season by season <span class="aside" id="timelineAside"></span></h2>
+    <div class="table-wrap"><table class="data" id="timeline"></table></div>
+  </section>
+</main>
 
-      <div class="left-col">
-        <div class="player-card" id="playerCard"><!-- rendered by JS --></div>
-        <div class="event-panel" id="eventPanel">
-          <div class="event-eyebrow">Loading</div>
-          <div class="event-headline">Setting up your career…</div>
-        </div>
-      </div>
-
-      <div class="timeline-panel">
-        <table class="timeline-table">
-          <thead>
-            <tr><th>Age</th><th>Club</th><th>APPS</th><th>GLS</th><th>AST</th><th>Honours</th></tr>
-          </thead>
-          <tbody id="timelineBody"><!-- rows added by JS --></tbody>
-        </table>
-      </div>
-
-    </div>
+<footer class="site-footer">
+  <div class="inner">
+    <span>Career Manager · a football career simulator</span>
+    <span>Club and league names are used for identification only. Not affiliated with any club or league.</span>
   </div>
-
-  <div class="site-footer">
-    <span>Career Manager · Sim Engine 0.1</span>
-    <span>Runs In Your Browser</span>
-  </div>
+</footer>
 
 <script type="module">
-  import { createPlayer } from "../engine/player.js";
-  import { runTurn, checkRetirement } from "../engine/turn.js";
-  import { computeOverall, computeMarketValue, describeCompetitiveness } from "../engine/rating.js";
-  import { applyEffects } from "../engine/events.js";
-  import { getAcademyOffers } from "../engine/academy.js";
-  import clubs from "../data/clubs.js";
+  import { getClub } from "../engine/clubInfo.js";
+  import { getPositionProfile } from "../engine/positions.js";
+  import { computeMarketValue, getOverall } from "../engine/rating.js";
+  import { roleFor, expectedMinutes, roleLabel } from "../engine/squad.js";
+  import { START_AGE } from "../engine/player.js";
+  import { chooseEvent, chooseTransfer, LAST_SEASON_AGE, playStretch, startCareer, upcomingSeasons } from "../engine/turn.js";
+  import { changesToTags } from "../engine/effects.js";
+  import { buildCareerSummary, groupHonours } from "../engine/summary.js";
+  import { formatNumber, formatValue, ordinal, seasonLabel } from "../engine/format.js";
+  import {
+    animateOvr, crestHtml, esc, honourChipsHtml, loadCareer, outcomeRowsHtml, ovrHtml,
+    roleChipHtml, saveCareer, starsHtml, tagsHtml, wait,
+  } from "./components.js";
 
-  // --- Load the player created on the identity screen, or fall back to a
-  // demo player so this page still works if opened directly during dev. ---
-  function loadPlayer() {
-    const saved = sessionStorage.getItem("careerManagerPlayer");
-    if (saved) return JSON.parse(saved);
-    console.warn("No player found in sessionStorage — using a demo player.");
-    return createPlayer({
-      lastName: "Park", number: "10", preferredFoot: "right",
-      country: "Spain", position: "ST",
-    });
+  const player = loadCareer();
+  if (!player) window.location.replace("characterCreation.html");
+
+  const $ = (id) => document.getElementById(id);
+  const isGK = player?.identity.position === "GK";
+  const TOTAL_SEASONS = LAST_SEASON_AGE - START_AGE + 1;
+  let busy = false;
+  let freshSeasons = new Set();
+
+  // ------------------------------------------------------------ band
+  function renderBand(ovr = getOverall(player)) {
+    const id = player.identity;
+    const profile = getPositionProfile(id.position);
+    const club = getClub(player.career.clubId);
+    const onLoan = player.career.loanSeasonsLeft > 0;
+    const parent = onLoan ? getClub(player.career.parentClubId) : null;
+    const value = computeMarketValue(player, ovr);
+    const role = club && !player.retired ? roleFor(player, club.id, ovr) : null;
+    const meta = player.retired
+      ? `${profile.name} · ${id.country} · Retired at ${player.retirement?.age ?? player.age}`
+      : `${profile.name} · ${id.country} · Age ${player.age} · ${seasonLabel(player.season)}`;
+
+    const clubBlock = club
+      ? `<div class="club-now">
+          ${crestHtml(club, 58)}
+          <div>
+            <b>${esc(club.name)}</b>
+            <div class="sub">${esc(club.league)} · ${starsHtml(club)}</div>
+            <div class="chips">
+              ${role ? roleChipHtml(role.id, player.age) : `<span class="role-chip role-bench">Retired</span>`}
+              ${player.status.captain && !player.retired ? `<span class="armband" title="Club captain">C</span>` : ""}
+              ${parent ? `<span class="loan-tag">On loan from ${esc(parent.name)}</span>` : ""}
+            </div>
+          </div>
+        </div>`
+      : `<div class="club-now"><div><b>No club yet</b><div class="sub">Pick your first contract below</div></div></div>`;
+
+    $("band").innerHTML = `
+      <div class="shirt" aria-label="Shirt number ${id.number}">${id.number}</div>
+      <div class="who">
+        <div class="kicker">${esc(id.position)} · ${id.preferredFoot === "left" ? "Left" : "Right"} foot</div>
+        <h1>${esc(id.lastName.toUpperCase())}</h1>
+        <div class="meta">${esc(meta)}</div>
+      </div>
+      ${clubBlock}
+      <div class="ovr-block">
+        ${ovrHtml(ovr, { id: "ovrBadge" })}
+        <div class="value"><b>${formatValue(value)}</b>Market value<br />Peak OVR ${Math.max(player.careerLog.peakOvr, ovr)}</div>
+      </div>`;
   }
 
-  const player = loadPlayer();
-
-  const playerCardEl = document.getElementById("playerCard");
-  const eventPanelEl = document.getElementById("eventPanel");
-  const timelineBodyEl = document.getElementById("timelineBody");
-  const seasonLabelEl = document.getElementById("seasonLabel");
-
-  let previousOvr = null;
-
-  function renderPlayerCard() {
-    const club = clubs.find((c) => c.id === player.career.currentClub);
-    const s = player.seasonLog;
-    const ovr = computeOverall(player);
-    const delta = previousOvr === null ? 0 : ovr - previousOvr;
-
-    playerCardEl.innerHTML = `
-      <div class="player-card-top">
-        <div class="ovr-badge" id="ovrBadge">${ovr}</div>
-        <div class="player-name-block">
-          <div class="name">${player.identity.lastName.toUpperCase()} · #${player.identity.number}</div>
-          <div class="sub">${player.identity.position} · ${club ? club.name : "Unattached"} · Age ${player.age}</div>
-          <div class="sub">${describeCompetitiveness(ovr)}</div>
-        </div>
-      </div>
-      <div class="player-meta-row">
-        <div><div class="val">${player.condition.morale}</div><div class="lab">Morale</div></div>
-        <div><div class="val">€${computeMarketValue(player)}M</div><div class="lab">Value</div></div>
-      </div>
-      <div class="season-box">
-        <span class="season-box-label">Last Stretch</span>
-        <span>${s.matchesPlayed} APPS</span><span>${s.goals} GLS</span><span>${s.assists} AST</span>
-      </div>
-      <div class="trophy-box">${
-        (() => {
-          const all = [...player.careerLog.collectiveTitles, ...player.careerLog.individualAwards];
-          return all.length ? all.join(" · ") : "Empty Trophy Case";
-        })()
-      }</div>
-    `;
-
-    // Pulse the OVR badge and float a "+N"/"-N" label whenever the rating
-    // actually moved since the last render — the whole point being that
-    // some seasons barely move the needle and some jump noticeably, and
-    // the animation should make that swing feel real.
-    if (delta !== 0) {
-      const badge = document.getElementById("ovrBadge");
-      badge.classList.add(delta > 0 ? "bump-up" : "bump-down");
-      const floatEl = document.createElement("div");
-      floatEl.className = `ovr-delta-float ${delta > 0 ? "positive" : "negative"}`;
-      floatEl.textContent = `${delta > 0 ? "+" : ""}${delta}`;
-      badge.appendChild(floatEl);
-      setTimeout(() => floatEl.remove(), 1500);
+  function renderProgress() {
+    const played = player.careerLog.seasons.length;
+    const segments = [];
+    for (let i = 0; i < TOTAL_SEASONS; i++) {
+      const cls = i < played ? "done" : i === played && !player.retired ? "now" : "";
+      segments.push(`<span class="${cls}" title="Age ${START_AGE + i}"></span>`);
     }
-
-    previousOvr = ovr;
-    seasonLabelEl.textContent = `Age ${player.age}`;
+    const label = player.retired
+      ? `Career complete · <b>${played}</b> seasons`
+      : `Season <b>${played + 1}</b> of up to ${TOTAL_SEASONS}`;
+    $("progress").innerHTML = `
+      <div class="progress-top"><span>Age ${START_AGE}</span><span>${label}</span><span>Age ${LAST_SEASON_AGE}</span></div>
+      <div class="segments" style="grid-template-columns: repeat(${TOTAL_SEASONS}, 1fr)">${segments.join("")}</div>`;
   }
 
-  // Instead of showing raw stat/fame/risk deltas, we preview the one number
-  // that actually matters to the player: how much their OVR would change.
-  // We do this by applying the effects to a throwaway clone and diffing
-  // computeOverall() before/after — no separate "what does FAME mean" tags.
-  // If a choice doesn't move OVR at all, we simply don't show a tag for it
-  // — a "+0 OVR" label isn't worth the clutter.
-  function computeOvrDelta(effects) {
-    const clone = structuredClone(player);
-    applyEffects(effects, clone);
-    return computeOverall(clone) - computeOverall(player);
-  }
-
-  function formatEffectTags(effects) {
-    const delta = computeOvrDelta(effects);
-    if (delta === 0) return [];
-    const sign = delta > 0 ? "+" : "";
-    return [{ text: `${sign}${delta} OVR`, positive: delta > 0 }];
-  }
-
-  // For risky choices (choice.outcomes present), show each possible outcome
-  // as its OVR impact plus probability — e.g. "+3 OVR · 65%" next to
-  // "-5 OVR · 35%" — instead of abstract labels. This previews the real
-  // risk before the player commits. If a given outcome doesn't move OVR,
-  // we just show its probability alone rather than a meaningless "+0 OVR".
-  function formatOutcomeTags(outcomes) {
-    return outcomes.map((o) => {
-      const delta = computeOvrDelta(o.effects);
-      const pct = `${Math.round(o.probability * 100)}%`;
-      const text = delta === 0 ? pct : `${delta > 0 ? "+" : ""}${delta} OVR · ${pct}`;
-      return { text, positive: delta > 0 };
-    });
-  }
-
-  function renderChoiceTags(choice) {
-    const tags = choice.outcomes ? formatOutcomeTags(choice.outcomes) : formatEffectTags(choice.effects);
-    return tags
-      .map((t) => `<span class="choice-tag${t.positive ? " positive" : ""}">${t.text}</span>`)
-      .join("");
-  }
-
-  // Renders the event card and returns a Promise that resolves with the
-  // chosen option once the player clicks one — this is passed to runTurn()
-  // as chooseFn, exactly like promptChoose() does for the CLI version.
-  function domChoose(eventView) {
-    return new Promise((resolve) => {
-      const isTransfer = eventView.category === "transfer";
-      const choicesHtml = eventView.choices
-        .map((choice, i) => {
-          // Club-signing choices (they carry `subtext` = league · country)
-          // get a crest block and skip the OVR tag — the club itself is
-          // the point, not a stat delta.
-          if (choice.subtext) {
-            return `
-              <div class="event-choice transfer-choice" data-index="${i}">
-                <div class="crest-block">${choice.crest || "?"}</div>
-                <div class="choice-label">${choice.label}</div>
-                <div class="choice-subtext">${choice.subtext}</div>
-              </div>`;
-          }
-          return `
-            <div class="event-choice" data-index="${i}">
-              <div class="choice-label">${choice.label}</div>
-              <div class="choice-tags">${renderChoiceTags(choice)}</div>
-            </div>`;
-        })
-        .join("");
-
-      eventPanelEl.innerHTML = `
-        <div class="event-eyebrow">${isTransfer ? "Transfer" : "Career Decision"}</div>
-        <div class="event-headline">${eventView.text}</div>
-        <div class="event-choices">${choicesHtml}</div>
-      `;
-
-      eventPanelEl.querySelectorAll(".event-choice").forEach((el) => {
-        el.addEventListener(
-          "click",
-          () => resolve(eventView.choices[Number(el.dataset.index)]),
-          { once: true }
-        );
-      });
-    });
-  }
-
-  function addTimelineRow(season, wonTrophies, wonAwards) {
-    const club = clubs.find((c) => c.id === player.career.currentClub);
-    const row = document.createElement("tr");
-    row.className = "current-row";
-    const tags = [
-      ...wonTrophies.map((label) => `<span class="honour-tag trophy">${label}</span>`),
-      ...wonAwards.map((label) => `<span class="honour-tag">${label}</span>`),
-    ].join("");
-    row.innerHTML = `
-      <td class="age-cell">${player.age}</td>
-      <td>${club ? club.name : player.career.currentClub}</td>
-      <td>${season.matches}</td>
-      <td>${season.goals}</td>
-      <td>${season.assists}</td>
-      <td>${tags}</td>
-    `;
-    document.querySelectorAll("#timelineBody tr.current-row").forEach((r) => r.classList.remove("current-row"));
-    timelineBodyEl.appendChild(row);
-    timelineBodyEl.parentElement.parentElement.scrollTop = timelineBodyEl.parentElement.parentElement.scrollHeight;
-  }
-
-  // Shown once at career start, before any turns run: three random clubs
-  // offer the player a youth deal. Reuses the same crest-block styling as
-  // in-game transfer choices for visual consistency.
-  function showAcademyOffer() {
-    return new Promise((resolve) => {
-      const offers = getAcademyOffers(clubs, 3);
-      const choicesHtml = offers
-        .map((club, i) => {
-          const initials = club.name
-            .split(/[\s-]+/)
-            .filter((w) => w.length > 0)
-            .slice(0, 3)
-            .map((w) => w[0])
-            .join("")
-            .toUpperCase();
-          return `
-            <div class="event-choice transfer-choice" data-index="${i}">
-              <div class="crest-block">${initials}</div>
-              <div class="choice-label">${club.name}</div>
-              <div class="choice-subtext">${club.league} · ${club.country}</div>
-            </div>`;
-        })
-        .join("");
-
-      eventPanelEl.innerHTML = `
-        <div class="event-eyebrow">Academy Intake</div>
-        <div class="event-headline">Three clubs want to sign you as a youth prospect. Where do you start?</div>
-        <div class="event-choices">${choicesHtml}</div>
-      `;
-
-      eventPanelEl.querySelectorAll(".event-choice").forEach((el) => {
-        el.addEventListener(
-          "click",
-          () => resolve(offers[Number(el.dataset.index)].id),
-          { once: true }
-        );
-      });
-    });
-  }
-
-  async function playLoop() {
-    if (!player.career.currentClub) {
-      player.career.currentClub = await showAcademyOffer();
+  // ------------------------------------------------------------ recap
+  function renderRecap() {
+    const recap = player.lastRecap;
+    const stage = player.pending?.stage;
+    if (!recap || !recap.rows.length || (stage !== "transfer" && stage !== "over")) {
+      $("recapSlot").innerHTML = "";
+      return;
     }
-    renderPlayerCard();
-
-    const PACE_TO_TURN_LENGTH = { intense: 1, normal: 2, express: 3 };
-    const turnLength = PACE_TO_TURN_LENGTH[player.meta?.pace] ?? 2;
-
-    while (!checkRetirement(player)) {
-      const result = await runTurn(player, turnLength, domChoose);
-      renderPlayerCard();
-      addTimelineRow(result.season, result.wonTrophies, result.wonAwards);
-
-      if (!result.resultText) {
-        eventPanelEl.innerHTML = `
-          <div class="event-eyebrow">Career Decision</div>
-          <div class="event-headline">Nothing major happened this season. Training continues quietly.</div>
-        `;
-        await new Promise((r) => setTimeout(r, 500));
+    const first = recap.rows[0].season;
+    const last = recap.rows[recap.rows.length - 1].season;
+    const title = first === last ? seasonLabel(first) : `${seasonLabel(first)} – ${seasonLabel(last)}`;
+    const delta = recap.ovrAfter - recap.ovrBefore;
+    const notes = [];
+    for (const row of recap.rows) {
+      if (row.intlDebut) notes.push({ text: `International debut for ${player.identity.country}`, tone: "up" });
+      if (row.tournament) {
+        notes.push(row.tournament.won
+          ? { text: `Won the ${row.tournament.year} ${row.tournament.name}`, tone: "gold" }
+          : { text: `Played at the ${row.tournament.year} ${row.tournament.name}`, tone: "info" });
+      }
+      if (row.missedMonths) {
+        notes.push({ text: `${row.missedReason === "ban" ? "Banned" : "Injured"} for ${row.missedMonths} month${row.missedMonths === 1 ? "" : "s"} in ${seasonLabel(row.season)}`, tone: "down" });
       }
     }
-
-    sessionStorage.setItem("careerManagerPlayer", JSON.stringify(player));
-    const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
-    window.location.href = dir + "summary.html";
+    $("recapSlot").innerHTML = `
+      <section class="card recap" aria-label="Recap">
+        <div class="recap-head">
+          <div><div class="kicker">Recap</div><h2>${title}</h2></div>
+          <div class="ovr-move">OVR ${ovrHtml(recap.ovrBefore, { small: true })}<span class="arrow">&rarr;</span>${ovrHtml(recap.ovrAfter, { small: true })}
+            ${delta ? `<span class="tag ${delta > 0 ? "up" : "down"}">${delta > 0 ? "+" : "−"}${Math.abs(delta)} OVR</span>` : `<span class="tag neutral">No change</span>`}
+          </div>
+        </div>
+        <div class="table-flat">
+          <table class="data">
+            <thead><tr><th>Season</th><th>Club</th><th class="num">Apps</th><th class="num">${isGK ? "CS" : "Gls"}</th><th class="num">Ast</th><th class="num">League</th><th>Honours</th></tr></thead>
+            <tbody>${recap.rows
+              .map((row) => {
+                const club = getClub(row.clubId);
+                return `<tr>
+                  <td>${seasonLabel(row.season)}</td>
+                  <td><span class="club-cell">${crestHtml(club, 26)}${esc(club.name)}${row.loan ? ` <span class="loan-tag">Loan</span>` : ""}</span></td>
+                  <td class="num">${row.apps}</td>
+                  <td class="num">${isGK ? row.cleanSheets : row.goals}</td>
+                  <td class="num">${row.assists}</td>
+                  <td class="num ${row.finish.position === 1 ? "finish-1" : ""}">${ordinal(row.finish.position)}</td>
+                  <td>${row.honours.length ? honourChipsHtml(row.honours) : `<span class="muted">-</span>`}</td>
+                </tr>`;
+              })
+              .join("")}</tbody>
+          </table>
+        </div>
+        <div class="recap-notes">${tagsHtml(notes).replace('<span class="tags"></span>', "")}</div>
+      </section>`;
   }
 
-  playLoop();
-</script>
+  // ------------------------------------------------------------ decision
+  function dealText(choice, stage) {
+    if (choice.type === "stay") return "Current club";
+    if (choice.type === "loan") return choice.note;
+    if (stage === "academy") return "Academy deal";
+    return choice.fee > 0 ? formatValue(choice.fee) : "Free transfer";
+  }
 
+  function kindText(choice, stage) {
+    if (choice.type === "stay") return "Stay";
+    if (choice.type === "loan") return "Loan";
+    if (stage === "academy") return "First contract";
+    return "Transfer";
+  }
+
+  function ctaText(choice, club, stage) {
+    if (choice.type === "stay") return `Stay at ${club.short} →`;
+    if (choice.type === "loan") return "Join on loan →";
+    if (stage === "academy") return `Join ${club.short} →`;
+    return `Sign for ${club.short} →`;
+  }
+
+  function optionHtml(choice, stage) {
+    if (choice.type === "retire") {
+      return `<button type="button" class="option is-retire" data-action="transfer" data-choice="retire">
+        <span class="opt-top"><span class="opt-kind">Retire</span></span>
+        <span class="retire-title">Hang up your boots</span>
+        <span class="retire-text">End your career at ${player.age} and see your legacy.</span>
+        <span class="opt-cta">Retire →</span>
+      </button>`;
+    }
+    const club = getClub(choice.clubId);
+    const parent = choice.type === "loan" ? getClub(player.career.parentClubId) : null;
+    const note = choice.note && choice.type === "move" ? `<span class="tag gold">${esc(choice.note)}</span>` : "";
+    const outcomes = choice.outcomePreview
+      ? `<span class="opt-outcomes"><span class="label">If you stay</span>${outcomeRowsHtml(choice.outcomePreview)}</span>`
+      : "";
+    return `<button type="button" class="option ${choice.type === "stay" ? "is-stay" : ""}" data-action="transfer" data-choice="${esc(choice.id)}">
+      <span class="opt-top"><span class="opt-kind">${kindText(choice, stage)}</span><span class="opt-deal">${esc(dealText(choice, stage))}</span></span>
+      <span class="opt-club">${crestHtml(club, 50)}<span><b>${esc(club.name)}</b><small>${esc(club.league)}</small>${starsHtml(club)}</span></span>
+      <span class="opt-role">${roleChipHtml(choice.preview.roleId, player.age)}<span>~${formatNumber(choice.preview.minutes)} min a season</span></span>
+      ${note ? `<span class="tags">${note}</span>` : ""}
+      ${parent ? `<span class="muted" style="font-size:13px">Back to ${esc(parent.name)} afterwards</span>` : ""}
+      ${outcomes}
+      <span class="opt-cta">${esc(ctaText(choice, club, stage))}</span>
+    </button>`;
+  }
+
+  function windowHtml(window) {
+    const kicker = window.stage === "academy" ? `First contract · Summer ${window.season}` : `Transfer window · Summer ${window.season}`;
+    return `
+      <div class="decision-head">
+        <div class="kicker">${kicker}</div>
+        <h2>${esc(window.scenario.title)}</h2>
+        <p>${esc(window.scenario.text)}</p>
+      </div>
+      <div class="decision-body">
+        <div class="options">${window.choices.map((c) => optionHtml(c, window.stage)).join("")}</div>
+      </div>`;
+  }
+
+  function resultsHtml(results) {
+    return `<div class="results">${results
+      .map((r) => {
+        const isEvent = r.choiceType === undefined;
+        const tags = isEvent || r.changes.length ? tagsHtml(changesToTags(r.changes)) : "";
+        return `<div class="result ${isEvent ? "event" : ""}"><div>
+          <div class="kicker">${esc(isEvent ? r.title : "Transfer window")}</div>
+          <p>${esc(r.text)}</p>${tags}</div></div>`;
+      })
+      .join("")}</div>`;
+  }
+
+  function eventHtml(event, results) {
+    return `
+      <div class="decision-head">
+        <div class="kicker">${esc(event.category)} · Age ${player.age}</div>
+        <h2>${esc(event.title)}</h2>
+        <p>${esc(event.text)}</p>
+      </div>
+      <div class="decision-body">
+        <div class="choices">${event.choices
+          .map(
+            (c) => `<button type="button" class="option" data-action="event" data-choice="${esc(c.id)}">
+              <span class="choice-label">${esc(c.label)}</span>
+              ${c.hint ? `<span class="choice-hint">${esc(c.hint)}</span>` : ""}
+              <span class="opt-outcomes">${outcomeRowsHtml(c.preview)}</span>
+              <span class="opt-cta">Choose →</span>
+            </button>`,
+          )
+          .join("")}</div>
+        ${results.length ? `<div style="margin-top:22px">${resultsHtml(results)}</div>` : ""}
+      </div>`;
+  }
+
+  function playHtml(results) {
+    const next = upcomingSeasons(player);
+    const club = getClub(player.career.clubId);
+    const role = roleFor(player);
+    const range = next.count === 1 ? seasonLabel(next.from) : `${seasonLabel(next.from)} – ${seasonLabel(next.to)}`;
+    const button = next.count === 1 ? `Play ${seasonLabel(next.from)} →` : `Play ${next.count} seasons →`;
+    return `
+      <div class="decision-head">
+        <div class="kicker">Decision made</div>
+        <h2>Ready for ${range}</h2>
+      </div>
+      <div class="decision-body">
+        ${resultsHtml(results)}
+        <div class="play-row">
+          <div class="next-up">${crestHtml(club, 42)}<div><b>${esc(club.name)}</b>
+            <span>${esc(roleLabel(role.id, player.age))} · ~${formatNumber(expectedMinutes(role.id))} min a season</span></div></div>
+          <button type="button" class="btn btn-primary" data-action="play" id="playBtn">${button}</button>
+        </div>
+      </div>`;
+  }
+
+  function overHtml() {
+    const log = player.careerLog;
+    const clubs = new Set(log.stints.map((s) => s.clubId)).size;
+    const name = esc(player.identity.lastName.toUpperCase());
+    const age = player.retirement?.age ?? player.age;
+    const line = player.retirement?.reason === "age" ? "Time catches up with everyone." : "On your own terms.";
+    const legacy = buildCareerSummary(player).legacy;
+    return `
+      <div class="over-body">
+        <div class="over-top"><div class="kicker">Full time</div><div class="stamp">${esc(legacy.label)}</div></div>
+        <h2>${name} retires at ${age}</h2>
+        <p>${line} ${log.seasons.length} seasons, ${clubs} club${clubs === 1 ? "" : "s"}, ${formatNumber(log.totals.apps)} appearances. See how it all adds up.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="summary.html">View career summary →</a>
+          <a class="btn" href="characterCreation.html">Start a new career</a>
+        </div>
+      </div>`;
+  }
+
+  function renderDecision() {
+    const pending = player.pending;
+    const el = $("decision");
+    if (!pending) return;
+    if (pending.stage === "transfer") el.innerHTML = windowHtml(pending.window);
+    else if (pending.stage === "event") el.innerHTML = eventHtml(pending.event, pending.results ?? []);
+    else if (pending.stage === "play") el.innerHTML = playHtml(pending.results ?? []);
+    else el.innerHTML = overHtml();
+  }
+
+  // ------------------------------------------------------------ side
+  function renderTotals() {
+    const { totals, intl } = player.careerLog;
+    const honours = player.careerLog.honours;
+    const trophies = honours.filter((h) => h.kind !== "award").length;
+    const cells = [
+      [formatNumber(totals.apps), "Apps"],
+      isGK ? [formatNumber(totals.cleanSheets), "Clean sh."] : [formatNumber(totals.goals), "Goals"],
+      [formatNumber(totals.assists), "Assists"],
+      [intl.caps, "Caps"],
+      [isGK ? honours.filter((h) => h.kind === "award").length : intl.goals, isGK ? "Awards" : "Intl goals"],
+      [trophies, "Trophies"],
+    ];
+    $("totals").innerHTML = `<h3 class="side-title">Career totals</h3>
+      <div class="totals-grid">${cells.map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("")}</div>`;
+  }
+
+  function renderCabinet() {
+    const honours = player.careerLog.honours;
+    const trophies = groupHonours(honours.filter((h) => h.kind !== "award"));
+    const awards = groupHonours(honours.filter((h) => h.kind === "award"));
+    const list = (title, items) =>
+      items.length
+        ? `<li class="group">${title}</li>${items.map((h) => `<li><span>${esc(h.name)}</span><b>${h.count > 1 ? "×" + h.count : ""}</b></li>`).join("")}`
+        : "";
+    $("cabinet").innerHTML = `<h3 class="side-title">Honours</h3>${
+      trophies.length || awards.length
+        ? `<ul class="cabinet">${list("Trophies", trophies)}${list("Individual awards", awards)}</ul>`
+        : `<p class="side-empty">${player.retired ? "No honours in this career." : "No honours yet. Win something and it goes in the cabinet."}</p>`
+    }`;
+  }
+
+  // ------------------------------------------------------------ timeline
+  function renderTimeline() {
+    const rows = player.careerLog.seasons;
+    const head = `<thead><tr><th>Age</th><th>Season</th><th>Club</th><th>Role</th><th class="num">OVR</th><th class="num">Apps</th><th class="num">${isGK ? "CS" : "Gls"}</th><th class="num">Ast</th><th class="num">League</th><th>Honours</th></tr></thead>`;
+    const body = [];
+    for (const row of rows) {
+      const club = getClub(row.clubId);
+      const delta = row.ovrChange ? `<span class="delta ${row.ovrChange > 0 ? "up" : "down"}">${row.ovrChange > 0 ? "+" : "−"}${Math.abs(row.ovrChange)}</span>` : "";
+      body.push(`<tr class="${freshSeasons.has(row.season) ? "highlight" : ""}">
+        <td>${row.age}</td>
+        <td>${seasonLabel(row.season)}</td>
+        <td><span class="club-cell">${crestHtml(club, 26)}${esc(club.name)}${row.loan ? ` <span class="loan-tag">Loan</span>` : ""}</span></td>
+        <td>${roleChipHtml(row.roleId, row.age)}</td>
+        <td class="num">${row.ovr}${delta}</td>
+        <td class="num">${row.apps}</td>
+        <td class="num">${isGK ? row.cleanSheets : row.goals}</td>
+        <td class="num">${row.assists}</td>
+        <td class="num ${row.finish.position === 1 ? "finish-1" : ""}">${ordinal(row.finish.position)}</td>
+        <td class="honours">${honourChipsHtml(row.honours)}</td>
+      </tr>`);
+    }
+    if (!player.retired) {
+      const club = getClub(player.career.clubId);
+      for (let age = player.age, season = player.season; age <= LAST_SEASON_AGE; age++, season++) {
+        const current = age === player.age;
+        body.push(`<tr class="${current ? "current" : "future"}">
+          <td>${age}</td><td>${seasonLabel(season)}</td>
+          <td>${current ? (club ? `<span class="club-cell">${crestHtml(club, 26)}${esc(club.name)}</span>` : "Choosing a club") : "-"}</td>
+          <td>${current ? `<span class="muted">Next</span>` : ""}</td>
+          <td class="num">${current ? getOverall(player) : "-"}</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td></td>
+        </tr>`);
+      }
+    }
+    $("timeline").innerHTML = head + `<tbody>${body.join("")}</tbody>`;
+    const log = player.careerLog;
+    $("timelineAside").textContent = `${log.seasons.length} played · ${formatNumber(log.totals.apps)} apps`;
+  }
+
+  function render(ovrShown) {
+    document.title = `${player.identity.lastName.toUpperCase()} · ${player.retired ? "Retired" : `Age ${player.age}`} · Career Manager`;
+    renderBand(ovrShown);
+    renderProgress();
+    renderRecap();
+    renderDecision();
+    renderTotals();
+    renderCabinet();
+    renderTimeline();
+  }
+
+  // ------------------------------------------------------------ actions
+  async function handleChoice(apply) {
+    const before = getOverall(player);
+    apply();
+    saveCareer(player);
+    freshSeasons = new Set();
+    render(before);
+    await animateOvr($("ovrBadge"), before, getOverall(player));
+    renderBand();
+  }
+
+  async function onTransfer(choiceId) {
+    const choice = player.pending.window.choices.find((c) => c.id === choiceId);
+    if (!choice) return;
+    if (choice.type === "retire" && !window.confirm(`Retire at ${player.age}? This ends your career.`)) return;
+    await handleChoice(() => {
+      chooseTransfer(player, choiceId);
+      player.lastRecap = null;
+    });
+    $("decision").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  async function onEvent(choiceId) {
+    await handleChoice(() => chooseEvent(player, choiceId));
+  }
+
+  async function onPlay() {
+    const before = getOverall(player);
+    const recap = playStretch(player);
+    saveCareer(player);
+
+    const el = $("decision");
+    el.innerHTML = `<div class="sim"><div class="kicker">Simulating</div><div class="big" id="simSeason"></div>
+      <div class="sim-bar"><span id="simBar"></span></div><div class="sim-lines" id="simLines"></div></div>`;
+    for (let i = 0; i < recap.rows.length; i++) {
+      const row = recap.rows[i];
+      const club = getClub(row.clubId);
+      $("simSeason").textContent = seasonLabel(row.season);
+      $("simBar").style.width = `${((i + 1) / recap.rows.length) * 100}%`;
+      await wait(650);
+      const output = isGK ? `${row.cleanSheets} clean sheets` : `${row.goals} goals, ${row.assists} assists`;
+      $("simLines").insertAdjacentHTML("beforeend", `<div>${seasonLabel(row.season)} · ${esc(club.short)} · ${row.apps} apps · ${output}</div>`);
+      await wait(350);
+    }
+
+    freshSeasons = new Set(recap.rows.map((r) => r.season));
+    render(before);
+    await animateOvr($("ovrBadge"), before, recap.ovrAfter);
+    renderBand();
+    $("recapSlot").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  $("decision").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn || busy) return;
+    busy = true;
+    $("decision").querySelectorAll("button").forEach((b) => (b.disabled = true));
+    try {
+      if (btn.dataset.action === "transfer") await onTransfer(btn.dataset.choice);
+      else if (btn.dataset.action === "event") await onEvent(btn.dataset.choice);
+      else if (btn.dataset.action === "play") await onPlay();
+    } catch (err) {
+      console.error(err);
+      $("decision").insertAdjacentHTML("afterbegin", `<p class="tag down" style="margin:16px 24px 0">Something went wrong: ${esc(err.message)}</p>`);
+    } finally {
+      busy = false;
+      $("decision").querySelectorAll("button").forEach((b) => (b.disabled = false));
+    }
+  });
+
+  if (player) {
+    if (!player.pending) {
+      startCareer(player);
+      saveCareer(player);
+    }
+    render();
+  }
+</script>
 </body>
 </html>

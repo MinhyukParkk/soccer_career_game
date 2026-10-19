@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Career Manager</title>
+<meta name="description" content="A football career simulator: from academy prospect to retirement, one transfer window at a time." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 34'%3E%3Cpath d='M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z' fill='%231d1e19'/%3E%3Cpath d='M7 14l8 6 8-6' fill='none' stroke='%23a1282a' stroke-width='3'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 56px;
+    align-items: center;
+    padding: 64px 0 56px;
+    border-bottom: 3px double var(--ink);
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(58px, 8.4vw, 112px);
+    line-height: 0.86;
+    letter-spacing: 0.005em;
+    margin: 14px 0 0;
+  }
+  .hero-title .red { color: var(--red); }
+  .hero .lede { font-size: 19px; margin-top: 20px; }
+  .hero .actions { margin-top: 30px; }
+
+  .resume {
+    margin-top: 26px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper-3);
+    max-width: 520px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+  .resume:hover { background: var(--paper-2); }
+  .resume .who { flex: 1; min-width: 0; }
+  .resume .who b { font-family: var(--font-display); font-weight: 400; font-size: 22px; letter-spacing: 0.04em; display: block; line-height: 1.05; }
+  .resume .who span { font-size: 13.5px; color: var(--ink-2); }
+  .resume .go { font-family: var(--font-display); font-size: 18px; letter-spacing: 0.06em; color: var(--red); white-space: nowrap; }
+
+  /* programme cover */
+  .cover {
+    position: relative;
+    justify-self: center;
+    width: min(100%, 380px);
+    aspect-ratio: 3 / 4;
+    background: var(--ink);
+    color: var(--paper);
+    border: 1.5px solid var(--ink);
+    box-shadow: 10px 10px 0 var(--red);
+    transform: rotate(2deg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .cover-top {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid rgba(239, 232, 214, 0.25);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #cdc4ab;
+  }
+  .cover-art { flex: 1; display: grid; place-items: center; position: relative; }
+  .cover-art::before {
+    content: "";
+    position: absolute;
+    inset: 22px;
+    border: 1px solid rgba(239, 232, 214, 0.18);
+    border-radius: 50%;
+  }
+  .cover-art svg { width: 64%; position: relative; }
+  .cover-bottom { padding: 12px 18px 18px; border-top: 1px solid rgba(239, 232, 214, 0.25); }
+  .cover-bottom .big { font-family: var(--font-display); font-size: 40px; line-height: 0.9; letter-spacing: 0.02em; }
+  .cover-bottom .small { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #cdc4ab; margin-top: 6px; }
+
+  /* facts strip */
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .fact { padding: 22px 0 20px; text-align: center; }
+  .fact + .fact { border-left: 1px solid var(--line); }
+  .fact b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 46px; line-height: 1; }
+  .fact span { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+
+  section.block { padding-top: 52px; }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  .step { border-top: 3px solid var(--ink); padding-top: 14px; }
+  .step .no { font-family: var(--font-display); font-size: 56px; line-height: 0.9; color: var(--red); }
+  .step h3 { font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: 0.03em; margin: 8px 0 6px; line-height: 1; }
+  .step p { margin: 0; color: var(--ink-2); font-size: 15px; }
+
+  .hall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .hall-card { display: flex; gap: 14px; align-items: center; padding: 18px; }
+  .hall-card .rank { font-family: var(--font-display); font-size: 44px; line-height: 1; color: var(--red); width: 34px; }
+  .hall-card .who { flex: 1; min-width: 0; }
+  .hall-card .who b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 25px; letter-spacing: 0.03em; line-height: 1.05; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hall-card .who span { display: block; font-size: 13px; color: var(--ink-2); }
+  .hall-card .legacy { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-top: 3px; }
+  .hall-more { margin-top: 18px; }
+
+  @media (max-width: 980px) {
+    .hero { grid-template-columns: 1fr; gap: 44px; padding-top: 44px; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .hall { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .steps { grid-template-columns: 1fr; }
+    .facts { grid-template-columns: 1fr 1fr; }
+    .fact:nth-child(3) { border-left: none; }
+    .fact:nth-child(n + 3) { border-top: 1px solid var(--line); }
+    .cover { transform: none; box-shadow: 6px 6px 0 var(--red); }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="home.html" aria-label="Career Manager home">
+      <svg viewBox="0 0 30 34" aria-hidden="true"><path d="M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z" fill="none" stroke="#efe8d6" stroke-width="2"/><path d="M7 14l8 6 8-6" fill="none" stroke="#a1282a" stroke-width="3"/><circle cx="15" cy="9" r="2.2" fill="#efe8d6"/></svg>
+      Career Manager
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="characterCreation.html">New career</a>
+      <a href="history.html">History</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <section class="hero">
+    <div>
+      <div class="kicker">The football career simulator</div>
+      <h1 class="hero-title">From academy kid<br />to <span class="red">legend.</span></h1>
+      <p class="lede">Create a 17-year-old prospect, sign your first contract and steer a whole career through transfer windows, loans, injuries and trophies, one decision at a time.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="characterCreation.html">Start a new career</a>
+        <a class="btn" href="history.html">Career history</a>
+      </div>
+      <div id="resumeSlot"></div>
+    </div>
+
+    <div class="cover" aria-hidden="true">
+      <div class="cover-top"><span>Matchday programme</span><span id="coverSeason"></span></div>
+      <div class="cover-art">
+        <svg viewBox="0 0 200 210">
+          <path d="M52 18 84 6c6 12 26 12 32 0l32 12 34 36-22 24-14-12v138H54V66L40 78 18 54z" fill="#a1282a" stroke="#efe8d6" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M84 6c6 12 26 12 32 0" fill="none" stroke="#efe8d6" stroke-width="5"/>
+          <text id="coverName" x="100" y="78" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="22" letter-spacing="2" fill="#efe8d6">YOUR NAME</text>
+          <text id="coverNumber" x="100" y="160" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="84" fill="#efe8d6">10</text>
+        </svg>
+      </div>
+      <div class="cover-bottom">
+        <div class="big" id="coverLine">The road starts here</div>
+        <div class="small" id="coverSub">Academy · Age 17</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="facts" aria-label="What's inside">
+    <div class="fact"><b>12</b><span>Positions</span></div>
+    <div class="fact"><b id="clubCount">0</b><span>Clubs</span></div>
+    <div class="fact"><b id="leagueCount">0</b><span>Leagues</span></div>
+    <div class="fact"><b id="countryCount">0</b><span>Nations</span></div>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title"><span class="num">01</span> How a career works</h2>
+    <ol class="steps">
+      <li class="step">
+        <div class="no">1</div>
+        <h3>Register</h3>
+        <p>Pick a name, a shirt number, a nationality and one of 12 positions. A striker and a centre-back live very different careers.</p>
+      </li>
+      <li class="step">
+        <div class="no">2</div>
+        <h3>First contract</h3>
+        <p>Three clubs make an offer. A top-flight academy where you start on the bench, or regular football in a second division?</p>
+      </li>
+      <li class="step">
+        <div class="no">3</div>
+        <h3>Transfer windows</h3>
+        <p>Every window you stay, move or go on loan. Your OVR, your role and your league decide how much you play and score.</p>
+      </li>
+      <li class="step">
+        <div class="no">4</div>
+        <h3>Legacy</h3>
+        <p>League titles, cups, Golden Boots, maybe a Ballon d'Or. Retire, get your legacy tier and keep the careers worth keeping.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title"><span class="num">02</span> Hall of fame <span class="aside">Best saved careers</span></h2>
+    <div id="hallSlot"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <span>Career Manager · a football career simulator</span>
+    <span>Club and league names are used for identification only. Not affiliated with any club or league.</span>
+  </div>
+</footer>
+
+<script type="module">
+  import CLUBS from "../data/clubs.js";
+  import COUNTRIES from "../data/countries.js";
+  import { getClub } from "../engine/clubInfo.js";
+  import { getPositionProfile } from "../engine/positions.js";
+  import { getOverall } from "../engine/rating.js";
+  import { currentSeasonStartYear } from "../engine/player.js";
+  import { seasonLabel } from "../engine/format.js";
+  import { esc, crestHtml, ovrHtml, loadCareer } from "./components.js";
+  import { getCareerHistory } from "./careerHistory.js";
+
+  document.getElementById("clubCount").textContent = CLUBS.length;
+  document.getElementById("leagueCount").textContent = new Set(CLUBS.map((c) => c.league)).size;
+  document.getElementById("countryCount").textContent = COUNTRIES.length;
+  document.getElementById("coverSeason").textContent = seasonLabel(currentSeasonStartYear());
+
+  // Career in progress: offer to continue, and put it on the cover.
+  const player = loadCareer();
+  if (player) {
+    const club = getClub(player.career.clubId);
+    const over = player.retired;
+    const where = club ? ` · ${club.name}` : "";
+    const meta = over
+      ? `Retired at ${player.retirement?.age ?? player.age} · ${getPositionProfile(player.identity.position).name}`
+      : `${getPositionProfile(player.identity.position).name} · Age ${player.age}${where}`;
+    document.getElementById("resumeSlot").innerHTML = `
+      <a class="resume" href="${over ? "summary.html" : "game.html"}">
+        ${club ? crestHtml(club, 40) : ""}
+        <span class="who"><b>${esc(player.identity.lastName.toUpperCase())}</b><span>${esc(meta)}</span></span>
+        <span class="go">${over ? "View summary" : "Continue"} &rarr;</span>
+      </a>`;
+    const coverName = document.getElementById("coverName");
+    coverName.textContent = player.identity.lastName.toUpperCase();
+    if (coverName.textContent.length > 7) {
+      coverName.setAttribute("textLength", String(Math.min(104, coverName.textContent.length * 11)));
+      coverName.setAttribute("lengthAdjust", "spacingAndGlyphs");
+    }
+    document.getElementById("coverNumber").textContent = player.identity.number;
+    document.getElementById("coverLine").textContent = over ? "Full time" : `OVR ${getOverall(player)}`;
+    document.getElementById("coverSub").textContent = over
+      ? `${player.careerLog.seasons.length} seasons · Retired`
+      : `${club ? club.name : "Choosing a club"} · Age ${player.age}`;
+  }
+
+  // Hall of fame: the three best saved careers.
+  const best = getCareerHistory()
+    .sort((a, b) => (b.peakOvr ?? 0) - (a.peakOvr ?? 0) || (b.trophyCount ?? 0) - (a.trophyCount ?? 0))
+    .slice(0, 3);
+  const hall = document.getElementById("hallSlot");
+  if (!best.length) {
+    hall.innerHTML = `<div class="empty"><div class="big">No saved careers yet</div>Finish a career and press "Save to history" on the summary page. Your best ones show up here.</div>`;
+  } else {
+    hall.innerHTML = `<div class="hall">${best
+      .map(
+        (rec, i) => `
+        <div class="card hall-card">
+          <div class="rank">${i + 1}</div>
+          <div class="who">
+            <b>${esc(String(rec.name).toUpperCase())}</b>
+            <span>${esc(rec.positionName || rec.position)}${rec.country ? " · " + esc(rec.country) : ""}</span>
+            <span>${rec.trophyCount ?? 0} trophies · ${rec.awardCount ?? 0} awards</span>
+            ${rec.legacy?.label ? `<div class="legacy">${esc(rec.legacy.label)}</div>` : ""}
+          </div>
+          ${ovrHtml(rec.peakOvr ?? 0, { small: true })}
+        </div>`,
+      )
+      .join("")}</div>
+      <div class="hall-more"><a class="btn btn-small" href="history.html">See all saved careers</a></div>`;
+  }
+</script>
+</body>
+</html>

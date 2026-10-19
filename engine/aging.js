@@ -1,64 +1,51 @@
-import { getPositionProfile } from "./positions.js";
-
-// Natural age-based development, independent of any story event — this is
-// the "OVR just climbs through your 20s and fades after your early 30s"
-// curve seen in real career sims. Applied every season inside runTurn.
+// Yearly development. After every season OVR moves on its own:
 //
-// Each player has a hidden, permanent `development.talent` multiplier
-// (rolled once at career creation — see engine/player.js) that scales
-// every season's growth. This is what actually produces real divergence
-// between careers: a high-talent roll compounds season after season into
-// a 90+ superstar, while a low-talent roll plateaus around 65-70, on top
-// of season-to-season randomness (some years jump, some barely move).
+//   up to 20   big jumps (+1.5 to +5 a year)
+//   21-23      still growing (+1 to +4)
+//   24-26      smaller gains (0 to +2.5)
+//   27-29      the plateau (-0.5 to +1.5)
+//   30-31      the turn (-1.2 to +0.8)
+//   32-33      decline (-1 to -3)
+//   34+        steep decline (-2 to -4.5)
+//
+// Each player has a hidden talent (how big the gains are) and a peak shift
+// (late bloomers keep improving for a couple more years, early peakers
+// fade sooner). There are breakout years and flat years. Gains shrink as
+// OVR gets near the top, so 90+ is rare but possible. The club you play for
+// has no effect at all.
 
-function randRange(min, max) {
-  return min + Math.random() * (max - min);
+import { adjustOverall, getOverall } from "./rating.js";
+import { chance, clamp, rand, stochasticRound } from "./random.js";
+
+function ageCurve(age) {
+  if (age <= 20) return rand(1.5, 5);
+  if (age <= 23) return rand(1, 4);
+  if (age <= 26) return rand(0, 2.5);
+  if (age <= 29) return rand(-0.5, 1.5);
+  if (age <= 31) return rand(-1.2, 0.8);
+  if (age <= 33) return -rand(1, 3);
+  return -rand(2, 4.5);
 }
 
-const ALL_STATS = ["attack", "defense", "speed", "stamina", "technique", "mental"];
-const DECLINE_PHYSICAL = ["speed", "stamina", "defense", "attack"]; // physical stats fade first
+export function developmentDelta(player) {
+  const { talent, peakShift } = player.development;
+  const curveAge = player.age - peakShift;
+  const ovr = getOverall(player);
+  let delta = ageCurve(curveAge);
 
-function pickStat(player, pool) {
-  // 70% of the time, grow/decline a stat that actually matters for this
-  // player's position (reinforcing specialization); 30% of the time, pick
-  // from the full pool (some general athletic development/decline too).
-  const profile = getPositionProfile(player.identity.position);
-  const relevant = pool.filter((s) => (profile.weights[s] ?? 0) >= 0.15);
-  if (relevant.length > 0 && Math.random() < 0.7) {
-    return relevant[Math.floor(Math.random() * relevant.length)];
+  if (delta > 0) {
+    delta *= talent;
+    if (curveAge <= 26 && chance(0.1)) delta += rand(2, 5) * talent; // breakout year
+    else if (chance(0.1)) delta *= 0.25; // flat year
+    delta *= clamp((99 - ovr) / 30, 0.2, 1); // harder to improve near the top
+  } else {
+    delta *= clamp(1.45 - 0.35 * talent, 0.6, 1.25); // great players age better
+    if (curveAge >= 31 && chance(0.08)) delta -= rand(2, 4); // sudden drop
   }
-  return pool[Math.floor(Math.random() * pool.length)];
+  return stochasticRound(delta);
 }
 
-export function applyAging(player, seasons) {
-  const talent = player.development?.talent ?? 1;
-
-  for (let i = 0; i < seasons; i++) {
-    const age = player.age;
-
-    if (age <= 29) {
-      // Development phase: young players naturally improve season to
-      // season — some years are a big leap, some barely move, and a
-      // genuine breakout campaign can happen on top of that.
-      const picks = 2 + Math.floor(Math.random() * 3); // 2-4 stats this season
-      for (let p = 0; p < picks; p++) {
-        const stat = pickStat(player, ALL_STATS);
-        let amount = randRange(1, 6) * talent;
-        if (Math.random() < 0.15) amount += randRange(5, 10) * talent; // breakout season
-        if (Math.random() < 0.10) amount *= 0.2; // quiet, stagnant season
-        player.stats[stat] = Math.min(99, Math.round(player.stats[stat] + amount));
-      }
-    } else if (age >= 32) {
-      // Decline phase: physical attributes go first; occasional sharp
-      // cliff (a bad injury-driven year) on top of normal aging.
-      const picks = 1 + Math.floor(Math.random() * 2); // 1-2 stats this season
-      for (let p = 0; p < picks; p++) {
-        const stat = pickStat(player, DECLINE_PHYSICAL);
-        let amount = randRange(1, 5);
-        if (Math.random() < 0.1) amount += randRange(4, 7); // cliff
-        player.stats[stat] = Math.max(1, Math.round(player.stats[stat] - amount));
-      }
-    }
-    // Ages 30-31: peak plateau — no automatic change either way.
-  }
+// Applies one year of development and returns the real OVR change.
+export function applyDevelopment(player) {
+  return adjustOverall(player, developmentDelta(player));
 }

@@ -2,227 +2,285 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Career Manager — Career Complete</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="shared.css">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Career summary · Career Manager</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 34'%3E%3Cpath d='M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z' fill='%231d1e19'/%3E%3Cpath d='M7 14l8 6 8-6' fill='none' stroke='%23a1282a' stroke-width='3'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
 <style>
-  /* Page-specific layout for the career summary / archive screen only. */
+  .legacy-stamp { font-size: 30px; padding: 9px 20px 4px; }
+  .legacy-line { margin: 18px 0 0; font-size: 18px; font-style: italic; color: var(--ink-2); }
 
-  .hero {
-    text-align: center;
-    padding: 40px 0 30px;
-    border-bottom: 3px solid var(--ink);
-  }
-  .hero .eyebrow { font-size: 12px; letter-spacing: 0.14em; color: var(--ink-dim); text-transform: uppercase; }
-  .hero h1 { font-size: 60px; margin: 6px 0 0; }
-  .hero .legacy-stamp {
-    display: inline-block; margin-top: 14px;
-    border: 2px solid var(--red); color: var(--red);
-    font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.08em;
-    padding: 8px 20px; text-transform: uppercase;
-  }
-
-  .summary-grid {
+  .stat-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-    padding: 34px 0;
-  }
-  .stat-card { border: 1.5px solid var(--ink); padding: 20px; text-align: center; }
-  .stat-card .num { font-family: 'Bebas Neue', sans-serif; font-size: 40px; }
-  .stat-card .lab { font-size: 11px; letter-spacing: 0.08em; color: var(--ink-faint); text-transform: uppercase; margin-top: 4px; }
-
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 0.03em;
-    border-bottom: 1px solid var(--ink);
-    padding-bottom: 8px;
-    margin: 30px 0 18px;
-  }
-
-  .club-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-  .club-card { border: 1.5px solid var(--ink); padding: 16px; }
-  .club-card .club-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; margin-bottom: 4px; }
-  .club-card .club-meta { font-size: 12px; color: var(--ink-dim); margin-bottom: 10px; }
-  .club-card .club-stats {
-    display: flex; justify-content: space-between;
-    font-size: 12.5px; color: var(--ink-dim);
-    border-top: 1px dotted var(--ink-faint); padding-top: 8px;
-  }
-  .club-card .club-stats b { color: var(--ink); font-family: 'Bebas Neue', sans-serif; font-size: 14px; }
-
-  .note-box {
-    font-size: 12.5px; color: var(--ink-dim); font-style: italic;
-    border-top: 1px dotted var(--ink-faint); padding-top: 12px; margin-top: 14px;
-  }
-
-  .trophy-cabinet {
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 30px;
     border: 1.5px solid var(--ink);
-    padding: 20px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--ink-faint);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    background: var(--paper-3);
+    box-shadow: var(--shadow);
   }
+  .stat { padding: 18px 20px 16px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .stat:nth-child(4n) { border-right: none; }
+  .stat:nth-last-child(-n + 4) { border-bottom: none; }
+  .stat b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 46px; line-height: 1; letter-spacing: 0.01em; }
+  .stat span { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .stat small { display: block; font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .stat.hero b { color: var(--red); }
 
-  .footer-actions {
+  .two-col { display: grid; grid-template-columns: 1fr 1.2fr; gap: 36px; padding-top: 48px; align-items: start; }
+
+  .cabinet-group + .cabinet-group { margin-top: 26px; }
+  .honour-list { list-style: none; margin: 0; padding: 0; }
+  .honour-list li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .honour-list .name { font-weight: 700; }
+  .honour-list .count { font-family: var(--font-display); font-size: 26px; line-height: 1; color: var(--red); grid-row: span 2; align-self: center; }
+  .honour-list .years { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); }
+
+  .journey { display: grid; gap: 12px; }
+  .stint { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; }
+  .stint .crest { --size: 48px; }
+  .stint b { font-family: var(--font-display); font-weight: 400; font-size: 23px; letter-spacing: 0.03em; line-height: 1; }
+  .stint .years { font-size: 13px; color: var(--ink-2); margin: 3px 0 4px; }
+  .stint .nums { display: flex; gap: 16px; font-family: var(--font-mono); font-size: 12.5px; text-align: right; }
+  .stint .nums div b { display: block; font-family: var(--font-display); font-size: 24px; }
+  .stint .nums span { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .stint-honours { grid-column: 2 / -1; }
+
+  .highlights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding-top: 48px; }
+  .highlight { padding: 16px 18px; border-top: 3px solid var(--ink); }
+  .highlight .label { margin-bottom: 4px; }
+  .highlight b { font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: 0.02em; line-height: 1.05; display: block; }
+  .highlight p { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); }
+
+  .table-section { padding-top: 48px; }
+  .finish-1 { color: #7a5a14; font-weight: 700; }
+  td.honours { white-space: normal; min-width: 180px; }
+
+  .save-bar {
+    margin-top: 44px;
+    padding: 22px 24px;
     display: flex;
-    justify-content: center;
-    gap: 14px;
-    padding: 30px 0 50px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .save-bar p { margin: 0; color: var(--ink-2); max-width: 520px; }
+  .save-bar p b { color: var(--ink); font-family: var(--font-display); font-weight: 400; font-size: 22px; letter-spacing: 0.04em; display: block; }
+
+  @media (max-width: 980px) {
+    .two-col { grid-template-columns: 1fr; }
+    .highlights { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .stat:nth-child(4n) { border-right: 1px solid var(--line); }
+    .stat:nth-child(2n) { border-right: none; }
+    .stat:nth-last-child(-n + 4) { border-bottom: 1px solid var(--line); }
+    .stat:nth-last-child(-n + 2) { border-bottom: none; }
+    .stat b { font-size: 38px; }
+    .stint { grid-template-columns: auto 1fr; }
+    .stint .nums { grid-column: 1 / -1; justify-content: flex-start; text-align: left; }
   }
 </style>
 </head>
 <body>
 
-  <nav class="site-nav">
-    <div class="logo"><span class="mark">⬢</span> CAREER MANAGER</div>
-    <div class="links">
-      <a href="#" class="current">Career</a>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="home.html" aria-label="Career Manager home">
+      <svg viewBox="0 0 30 34" aria-hidden="true"><path d="M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z" fill="none" stroke="#efe8d6" stroke-width="2"/><path d="M7 14l8 6 8-6" fill="none" stroke="#a1282a" stroke-width="3"/><circle cx="15" cy="9" r="2.2" fill="#efe8d6"/></svg>
+      Career Manager
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="characterCreation.html">New career</a>
       <a href="history.html">History</a>
-      <a href="#">How It Works</a>
-      <a href="#">Blog</a>
-    </div>
-    <div class="auth">
-      <a href="#">Log in</a>
-      <a href="#" class="signup">Sign up</a>
-    </div>
-  </nav>
-
-  <div class="subnav">
-    <span>Career Sim / Retired</span>
-    <span id="finalAgeLabel">Age —</span>
+    </nav>
   </div>
+</header>
 
-  <div class="page">
+<main class="page" id="root"></main>
 
-    <div class="hero">
-      <div class="eyebrow">Career Complete</div>
-      <h1 id="heroName">PLAYER</h1>
-      <div class="legacy-stamp" id="legacyStamp">—</div>
-    </div>
-
-    <div class="summary-grid" id="statGrid"><!-- rendered by JS --></div>
-
-    <div class="section-title">Clubs Represented</div>
-    <div class="club-list" id="clubList"><!-- rendered by JS --></div>
-
-    <div class="section-title">Honours Cabinet</div>
-    <div class="trophy-cabinet" id="trophyCabinet">Empty Trophy Case</div>
-
-    <div class="footer-actions">
-      <button class="back-btn" id="viewHistoryBtn">View Career History</button>
-      <button class="back-btn" id="saveHistoryBtn">Save This Career</button>
-      <button class="kickoff-btn" id="playAgainBtn">Play Again</button>
-    </div>
-
+<footer class="site-footer">
+  <div class="inner">
+    <span>Career Manager · a football career simulator</span>
+    <span>Club and league names are used for identification only. Not affiliated with any club or league.</span>
   </div>
-
-  <div class="site-footer">
-    <span>Career Manager · Sim Engine 0.1</span>
-    <span>Runs In Your Browser</span>
-  </div>
+</footer>
 
 <script type="module">
-  import { generateSummary } from "../engine/summary.js";
-  import { computeMarketValue, computeOverall } from "../engine/rating.js";
-  import clubs from "../data/clubs.js";
-  import { saveCareerRecord } from "./careerHistory.js";
+  import { getClub } from "../engine/clubInfo.js";
+  import { buildCareerSummary, buildHistoryRecord } from "../engine/summary.js";
+  import { formatNumber, formatValue, ordinal, seasonLabel } from "../engine/format.js";
+  import { esc, crestHtml, honourChipsHtml, loadCareer, roleChipHtml } from "./components.js";
+  import { isCareerSaved, saveCareerRecord } from "./careerHistory.js";
 
-  const saved = sessionStorage.getItem("careerManagerPlayer");
-  const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
-  if (!saved) {
-    console.warn("No player found — redirecting to character creation.");
-    window.location.href = dir + "characterCreation.html";
+  const root = document.getElementById("root");
+  const player = loadCareer();
+
+  if (!player) {
+    root.innerHTML = `
+      <div class="masthead"><div><div class="kicker">Career summary</div><h1 class="title">Nothing to show yet</h1></div></div>
+      <div class="empty" style="margin-top:30px"><div class="big">No career found</div>Start a career and play it to the end to see its summary here.
+        <div class="actions" style="justify-content:center;margin-top:18px"><a class="btn btn-primary" href="characterCreation.html">Start a new career</a><a class="btn" href="history.html">Career history</a></div></div>`;
+  } else if (!player.retired) {
+    root.innerHTML = `
+      <div class="masthead"><div><div class="kicker">Career summary</div><h1 class="title">${esc(player.identity.lastName.toUpperCase())} is still playing</h1></div></div>
+      <div class="empty" style="margin-top:30px"><div class="big">The final whistle hasn't gone</div>The summary appears when the career ends, either when you retire or after the age-39 season.
+        <div class="actions" style="justify-content:center;margin-top:18px"><a class="btn btn-primary" href="game.html">Continue career</a></div></div>`;
+  } else {
+    renderSummary(buildCareerSummary(player));
   }
-  const player = JSON.parse(saved);
-  const summary = generateSummary(player);
 
-  function clubInfo(id) {
-    return clubs.find((c) => c.id === id) || { name: id, tier: "?", country: "?" };
-  }
+  function renderSummary(s) {
+    const isGK = s.position === "GK";
+    const yearRange = `${seasonLabel(s.startYear)} – ${seasonLabel(s.endYear - 1)}`;
+    const retiredAt = s.retirement?.age ?? "";
+    const outputRow = (row) => (isGK ? row.cleanSheets : row.goals);
+    const best = [...s.seasons].sort((a, b) => outputRow(b) - outputRow(a) || b.assists - a.assists)[0];
+    const bestClub = best ? getClub(best.clubId) : null;
+    const move = s.biggestMove;
+    const moveClub = move ? getClub(move.toId) : null;
 
-  document.getElementById("heroName").textContent =
-    `${player.identity.lastName.toUpperCase()} · #${player.identity.number}`;
-  document.getElementById("finalAgeLabel").textContent = `Retired at Age ${player.age}`;
-  document.getElementById("legacyStamp").textContent = summary.legacyTier;
+    const stats = [
+      { v: s.peakOvr, l: "Peak OVR", note: `at age ${s.peakOvrAge}`, hero: true },
+      { v: s.seasonsPlayed, l: "Seasons", note: `${s.clubCount} club${s.clubCount === 1 ? "" : "s"}` },
+      { v: formatNumber(s.totals.apps), l: "Appearances", note: `${formatNumber(Math.round(s.totals.minutes / 90))} full matches` },
+      isGK
+        ? { v: formatNumber(s.totals.cleanSheets), l: "Clean sheets", note: `${s.totals.apps ? Math.round((100 * s.totals.cleanSheets) / s.totals.apps) : 0}% of games` }
+        : { v: formatNumber(s.totals.goals), l: "Goals", note: `${s.totals.apps ? (s.totals.goals / s.totals.apps).toFixed(2) : "0.00"} per game` },
+      { v: formatNumber(s.totals.assists), l: "Assists", note: isGK ? "" : `${formatNumber(s.totals.goals + s.totals.assists)} goal contributions` },
+      { v: s.intl.caps, l: "International caps", note: s.intl.caps ? `${s.intl.goals} goal${s.intl.goals === 1 ? "" : "s"} for ${s.country}` : `Never capped by ${s.country}` },
+      { v: s.trophyCount, l: "Trophies", note: `${s.awardCount} individual award${s.awardCount === 1 ? "" : "s"}` },
+      { v: formatValue(s.peakValue), l: "Peak value", note: `at age ${s.peakValueAge}` },
+    ];
 
-  document.getElementById("statGrid").innerHTML = `
-    <div class="stat-card"><div class="num">${summary.totalMatches}</div><div class="lab">Matches</div></div>
-    <div class="stat-card"><div class="num">${summary.totalGoals}</div><div class="lab">Goals</div></div>
-    <div class="stat-card"><div class="num">${summary.totalAssists}</div><div class="lab">Assists</div></div>
-    <div class="stat-card"><div class="num">${summary.internationalCaps}</div><div class="lab">Int'l Caps</div></div>
-    <div class="stat-card"><div class="num">€${computeMarketValue(player)}M</div><div class="lab">Peak Value</div></div>
-    <div class="stat-card"><div class="num">${summary.clubStints.length}</div><div class="lab">Clubs</div></div>
-  `;
+    const honourList = (items) =>
+      items.length
+        ? `<ul class="honour-list">${items
+            .map((h) => `<li><span class="name">${esc(h.name)}</span><span class="count">${h.count > 1 ? "×" + h.count : ""}</span>
+              <span class="years">${h.seasons.map(seasonLabel).join(", ")}</span></li>`)
+            .join("")}</ul>`
+        : `<p class="muted" style="font-style:italic;margin:0">None.</p>`;
 
-  // Every stint on the journey, in chronological order, each with its own
-  // real apps/goals/assists — not just a name, an actual per-club record.
-  document.getElementById("clubList").innerHTML = summary.clubStints
-    .map((stint) => {
-      const club = clubInfo(stint.clubId);
-      return `
-        <div class="club-card">
-          <div class="club-name">${club.name}</div>
-          <div class="club-meta">${club.league ?? "Tier " + club.tier} · ${club.country}</div>
-          <div class="club-stats">
-            <span><b>${stint.matches}</b> APPS</span>
-            <span><b>${stint.goals}</b> GLS</span>
-            <span><b>${stint.assists}</b> AST</span>
-          </div>
-        </div>`;
-    })
-    .join("");
+    root.innerHTML = `
+      <div class="masthead">
+        <div>
+          <div class="kicker">Career summary · ${yearRange}</div>
+          <h1 class="title">${esc(s.name.toUpperCase())}</h1>
+          <p class="lede">${esc(s.positionName)} · ${esc(s.country)} · #${s.number} · Retired at ${retiredAt}</p>
+        </div>
+        <div class="stamp legacy-stamp">${esc(s.legacy.label)}</div>
+      </div>
+      <p class="legacy-line">${esc(s.legacy.text)}</p>
 
-  const trophies = [...summary.collectiveTitles, ...summary.individualAwards];
-  document.getElementById("trophyCabinet").textContent = trophies.length
-    ? trophies.join(" · ")
-    : "Empty Trophy Case";
+      <div class="stat-grid">${stats
+        .map((st) => `<div class="stat ${st.hero ? "hero" : ""}"><b>${st.v}</b><span>${st.l}</span>${st.note ? `<small>${esc(st.note)}</small>` : ""}</div>`)
+        .join("")}</div>
 
-  // Saving is the player's choice — nothing is written to history until
-  // they explicitly click "Save This Career".
-  function buildCareerRecord() {
-    return {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      savedAt: Date.now(),
-      lastName: player.identity.lastName,
-      number: player.identity.number,
-      position: player.identity.position,
-      country: player.identity.country,
-      finalAge: player.age,
-      finalOvr: computeOverall(player),
-      legacyTier: summary.legacyTier,
-      totalMatches: summary.totalMatches,
-      totalGoals: summary.totalGoals,
-      totalAssists: summary.totalAssists,
-      internationalCaps: summary.internationalCaps,
-      peakValueM: computeMarketValue(player),
-      finalClubId: player.career.currentClub,
-      clubsCount: summary.clubStints.length,
-      collectiveTitles: summary.collectiveTitles,
-      individualAwards: summary.individualAwards,
+      <div class="two-col">
+        <section>
+          <h2 class="section-title"><span class="num">01</span> Honours <span class="aside">${s.trophyCount + s.awardCount} in total</span></h2>
+          <div class="cabinet-group"><span class="label">Trophies</span>${honourList(s.trophies)}</div>
+          <div class="cabinet-group"><span class="label">Individual awards</span>${honourList(s.awards)}</div>
+        </section>
+        <section>
+          <h2 class="section-title"><span class="num">02</span> Club journey <span class="aside">${s.stints.length} spell${s.stints.length === 1 ? "" : "s"}</span></h2>
+          <div class="journey">${s.stints
+            .map((st) => {
+              const club = getClub(st.clubId);
+              const years = st.from === st.to ? seasonLabel(st.from) : `${seasonLabel(st.from)} – ${seasonLabel(st.to)}`;
+              const honours = st.honours.length ? groupNames(st.honours) : [];
+              return `<div class="card stint">
+                ${crestHtml(club, 48)}
+                <div><b>${esc(club?.name ?? st.clubId)}</b> ${st.loan ? `<span class="loan-tag">Loan</span>` : ""}
+                  <div class="years">${years} · ${esc(club?.league ?? "")}</div></div>
+                <div class="nums">
+                  <div><b>${st.apps}</b><span>Apps</span></div>
+                  <div><b>${isGK ? st.cleanSheets : st.goals}</b><span>${isGK ? "CS" : "Gls"}</span></div>
+                  <div><b>${st.assists}</b><span>Ast</span></div>
+                </div>
+                ${honours.length ? `<div class="stint-honours">${honours.map((h) => `<span class="honour ${h.award ? "award" : "trophy"}">${esc(h.name)}${h.count > 1 ? " ×" + h.count : ""}</span>`).join("")}</div>` : ""}
+              </div>`;
+            })
+            .join("")}</div>
+        </section>
+      </div>
+
+      <div class="highlights">
+        <div class="highlight"><span class="label">Best season</span>
+          ${best ? `<b>${outputRow(best)} ${isGK ? "clean sheets" : "goals"}, ${best.assists} assists</b><p>${seasonLabel(best.season)} at ${esc(bestClub?.name ?? "")}, age ${best.age}</p>` : `<b>-</b>`}
+        </div>
+        <div class="highlight"><span class="label">Record transfer</span>
+          ${move && move.fee > 0 ? `<b>${formatValue(move.fee)} to ${esc(moveClub?.name ?? "")}</b><p>Summer ${move.season}, age ${move.age}</p>` : `<b>No fee ever paid</b><p>Free transfers and academy deals only</p>`}
+        </div>
+        <div class="highlight"><span class="label">International career</span>
+          ${s.intl.caps ? `<b>${s.intl.caps} caps, ${s.intl.goals} goals</b><p>Debut in ${seasonLabel(s.intl.debutSeason)}</p>` : `<b>Never capped</b><p>${esc(s.country)} never came calling</p>`}
+        </div>
+      </div>
+
+      <section class="table-section">
+        <h2 class="section-title"><span class="num">03</span> Season by season</h2>
+        <div class="table-wrap"><table class="data">
+          <thead><tr><th>Age</th><th>Season</th><th>Club</th><th>Role</th><th class="num">OVR</th><th class="num">Apps</th><th class="num">${isGK ? "CS" : "Gls"}</th><th class="num">Ast</th><th class="num">Caps</th><th class="num">League</th><th>Honours</th></tr></thead>
+          <tbody>${s.seasons
+            .map((row) => {
+              const club = getClub(row.clubId);
+              return `<tr>
+                <td>${row.age}</td><td>${seasonLabel(row.season)}</td>
+                <td><span class="club-cell">${crestHtml(club, 26)}${esc(club?.name ?? row.clubId)}${row.loan ? ` <span class="loan-tag">Loan</span>` : ""}</span></td>
+                <td>${roleChipHtml(row.roleId, row.age)}</td>
+                <td class="num">${row.ovr}</td><td class="num">${row.apps}</td><td class="num">${outputRow(row)}</td><td class="num">${row.assists}</td>
+                <td class="num">${row.caps || "-"}</td>
+                <td class="num ${row.finish.position === 1 ? "finish-1" : ""}">${ordinal(row.finish.position)}</td>
+                <td class="honours">${honourChipsHtml(row.honours)}</td>
+              </tr>`;
+            })
+            .join("")}</tbody>
+        </table></div>
+      </section>
+
+      <div class="card save-bar">
+        <p id="saveText"><b>Keep this one?</b>Saved careers are ranked by peak OVR on the history page. Nothing is saved unless you choose to.</p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="saveBtn">Save to history</button>
+          <a class="btn" href="history.html">Career history</a>
+          <a class="btn" href="characterCreation.html">New career</a>
+        </div>
+      </div>`;
+
+    const saveBtn = document.getElementById("saveBtn");
+    const markSaved = () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saved to history";
+      document.getElementById("saveText").innerHTML = `<b>Saved.</b>This career is on your history page. You can delete it there at any time.`;
     };
+    if (isCareerSaved(s.id)) markSaved();
+    saveBtn.addEventListener("click", () => {
+      if (saveCareerRecord(buildHistoryRecord(player))) markSaved();
+      else document.getElementById("saveText").innerHTML = `<b>Couldn't save.</b>Your browser is blocking local storage.`;
+    });
   }
 
-  const saveBtn = document.getElementById("saveHistoryBtn");
-  saveBtn.addEventListener("click", () => {
-    const ok = saveCareerRecord(buildCareerRecord());
-    saveBtn.textContent = ok ? "Saved ✓" : "Save Failed";
-    saveBtn.disabled = true;
-  });
-
-  document.getElementById("playAgainBtn").addEventListener("click", () => {
-    sessionStorage.removeItem("careerManagerPlayer");
-    window.location.href = dir + "characterCreation.html";
-  });
-
-  document.getElementById("viewHistoryBtn").addEventListener("click", () => {
-    window.location.href = dir + "history.html";
-  });
+  // Stint honours: [{ name, kind }] -> [{ name, count, award }]
+  function groupNames(honours) {
+    const groups = new Map();
+    for (const h of honours) {
+      const name = typeof h === "string" ? h : h.name;
+      const group = groups.get(name) ?? { name, count: 0, award: h.kind === "award" };
+      group.count += 1;
+      groups.set(name, group);
+    }
+    return [...groups.values()].sort((a, b) => Number(a.award) - Number(b.award));
+  }
 </script>
-
 </body>
 </html>

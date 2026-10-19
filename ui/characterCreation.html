@@ -2,362 +2,570 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Career Manager — Define Your Identity</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="shared.css">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>New career · Career Manager</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 34'%3E%3Cpath d='M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z' fill='%231d1e19'/%3E%3Cpath d='M7 14l8 6 8-6' fill='none' stroke='%23a1282a' stroke-width='3'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
 <style>
-  /* Page-specific layout for the character creation screen only.
-     Shared tokens, nav, footer, buttons, and section titles live in shared.css. */
+  .notice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    padding: 12px 16px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper-3);
+  }
+  .notice p { margin: 0; flex: 1; min-width: 220px; font-size: 15px; }
+  .notice b { font-family: var(--font-display); font-weight: 400; font-size: 20px; letter-spacing: 0.04em; }
 
   .columns {
     display: grid;
-    grid-template-columns: 1fr 1.25fr 1fr;
-    gap: 44px;
-    padding: 34px 0;
+    grid-template-columns: 0.95fr 1fr 1.15fr;
+    gap: 40px;
+    padding-top: 36px;
   }
 
-  /* --- Identity --- */
-  .jersey-wrap { display: flex; justify-content: center; margin: 6px 0 20px; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
-  .foot-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
-
-  /* --- Nationality --- */
-  .selected-country { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .flag-name { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
-  .count-label { font-size: 11px; color: var(--red); font-weight: 700; letter-spacing: 0.04em; }
-  .search-input { margin-bottom: 12px; }
-  .country-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-    overflow-y: auto; max-height: 220px; padding-right: 4px;
-    border-top: 1px dotted var(--ink-faint); padding-top: 10px;
+  /* identity */
+  .jersey { display: flex; justify-content: center; padding: 6px 0 22px; }
+  .jersey svg { width: 190px; height: auto; filter: drop-shadow(5px 5px 0 rgba(29, 30, 25, 0.9)); }
+  .field { margin-bottom: 18px; }
+  .field-row { display: grid; grid-template-columns: 1fr 104px; gap: 16px; }
+  .input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--ink);
+    padding: 7px 2px 6px;
+    font-family: var(--font-body);
+    font-size: 18px;
+    color: var(--ink);
+    border-radius: 0;
   }
-  .country-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border: 1px solid transparent; cursor: pointer; font-size: 13.5px; }
-  .country-item:hover { border-color: var(--ink-faint); }
-  .country-item .code { color: var(--ink-faint); font-size: 11px; }
-  .country-item.selected { background: var(--ink); color: var(--paper); }
-  .country-item.selected .code { color: var(--paper-dark); }
-  .hint-box { margin-top: 16px; padding-top: 14px; border-top: 1px dotted var(--ink-faint); font-size: 12.5px; color: var(--ink-dim); font-style: italic; }
-  .hint-box b { color: var(--red); display: block; font-style: normal; margin-bottom: 2px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em; font-size: 14px; }
+  .input:focus { outline: none; border-bottom-color: var(--red); background: rgba(248, 243, 231, 0.6); }
+  .input[aria-invalid="true"] { border-bottom-color: var(--red); }
+  .input.mono { font-family: var(--font-mono); font-weight: 600; }
+  .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .toggle {
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    padding: 10px 8px 8px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    color: var(--ink-2);
+  }
+  .toggle:hover { background: var(--paper-2); }
+  .toggle[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .field-note { font-size: 12.5px; color: var(--ink-3); margin-top: 5px; min-height: 18px; }
+  .field-note.error { color: var(--red); }
 
-  /* --- Position --- */
+  /* nationality */
+  .nation-now { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+  .code-box {
+    flex: none;
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 0.06em;
+    padding-top: 3px;
+  }
+  .nation-now h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 30px; letter-spacing: 0.03em; line-height: 1; }
+  .nation-facts { list-style: none; margin: 6px 0 0; padding: 0; font-size: 13.5px; color: var(--ink-2); }
+  .nation-facts li { padding: 2px 0; }
+  .nation-facts b { color: var(--ink); }
+  .search { margin-bottom: 10px; }
+  .country-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 8px 4px 4px 0;
+    border-top: 1px dotted var(--ink-3);
+  }
+  .country {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 9px;
+    border: 1px solid transparent;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .country:hover { border-color: var(--ink-3); }
+  .country .code { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+  .country[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .country[aria-pressed="true"] .code { color: #cdc4ab; }
+  .no-results { grid-column: 1 / -1; font-size: 14px; color: var(--ink-3); padding: 10px 2px; }
+
+  /* position */
   .pitch {
     position: relative;
-    background: #c9c7a0; /* muted olive-green, evokes a pitch while staying in the paper palette */
-    height: 420px;
+    aspect-ratio: 3 / 3.6;
     border: 1.5px solid var(--ink);
+    box-shadow: var(--shadow);
+    background: repeating-linear-gradient(180deg, var(--pitch) 0 10%, var(--pitch-2) 10% 20%);
+    overflow: hidden;
   }
-  .pitch::before { content: ""; position: absolute; inset: 12px; border: 1px solid rgba(35,36,31,0.25); }
-  .pitch::after {
-    content: ""; position: absolute; left: 50%; top: 62%;
-    width: 70px; height: 70px; border: 1px solid rgba(35,36,31,0.25); border-radius: 50%;
-    transform: translate(-50%,-50%);
+  .pitch svg.lines { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .token {
+    --c: var(--ink);
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 2.5px solid var(--c);
+    background: var(--paper-3);
+    color: var(--c);
+    font-family: var(--font-display);
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    padding-top: 3px;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+    transition: transform 0.12s, background 0.12s, color 0.12s;
   }
-  .pos-dot {
-    position: absolute; width: 40px; height: 40px;
-    background: var(--paper); border: 2px solid var(--dot-color, var(--ink));
-    color: var(--dot-color, var(--ink-dim));
-    border-radius: 50%; font-family: 'Bebas Neue', sans-serif; font-size: 10.5px;
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-    transform: translate(-50%,-50%);
-    transition: background 0.12s, color 0.12s;
+  .token:hover { transform: translate(-50%, -50%) scale(1.08); }
+  .token[aria-pressed="true"] { background: var(--c); color: var(--paper); transform: translate(-50%, -50%) scale(1.14); box-shadow: 0 0 0 4px rgba(248, 243, 231, 0.75), 0 3px 0 rgba(0, 0, 0, 0.35); }
+  .token[data-line="attack"] { --c: var(--red); }
+  .token[data-line="midfield"] { --c: #8a6418; }
+  .token[data-line="defense"] { --c: var(--navy); }
+  .token[data-line="goalkeeper"] { --c: var(--ink); }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+
+  .pos-info { margin-top: 20px; padding: 18px 20px; }
+  .pos-head { display: flex; align-items: center; gap: 12px; }
+  .pos-code { font-family: var(--font-display); font-size: 34px; line-height: 1; padding: 6px 10px 2px; background: var(--ink); color: var(--paper); letter-spacing: 0.04em; }
+  .pos-head b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: 0.03em; line-height: 1; }
+  .pos-head div span { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .pos-blurb { margin: 12px 0 16px; font-style: italic; color: var(--ink-2); }
+  .bars { display: grid; gap: 7px; margin-bottom: 16px; }
+  .bar-row { display: grid; grid-template-columns: 84px 1fr 38px; gap: 10px; align-items: center; font-size: 13.5px; }
+  .bar-track { height: 8px; background: rgba(29, 30, 25, 0.1); }
+  .bar-fill { height: 100%; background: var(--ink); }
+  .bar-row .pct { font-family: var(--font-mono); font-size: 12px; text-align: right; color: var(--ink-2); }
+  .output { display: flex; gap: 22px; flex-wrap: wrap; font-size: 13.5px; }
+  .dots { letter-spacing: 2px; color: var(--red); margin-left: 6px; }
+  .dots .off { color: rgba(29, 30, 25, 0.2); }
+
+  /* pace */
+  .pace-section { padding-top: 44px; }
+  .paces { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .pace {
+    text-align: left;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    padding: 16px 18px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
   }
-  .pos-dot:hover { background: var(--paper-dark); }
-  .pos-dot.active { background: var(--dot-color, var(--ink)); color: var(--paper); }
+  .pace:hover { background: var(--paper-2); }
+  .pace b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: 0.04em; line-height: 1; }
+  .pace span { display: block; font-size: 14px; color: var(--ink-2); margin-top: 6px; }
+  .pace small { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-top: 8px; }
+  .pace[aria-pressed="true"] { background: var(--ink); box-shadow: 4px 4px 0 var(--red); }
+  .pace[aria-pressed="true"] b { color: var(--paper); }
+  .pace[aria-pressed="true"] span { color: #ddd4bb; }
+  .pace[aria-pressed="true"] small { color: #b9b096; }
 
-  .pos-dot[data-role="attack"] { --dot-color: var(--red); }
-  .pos-dot[data-role="midfield"] { --dot-color: #a9822c; }
-  .pos-dot[data-role="defense"] { --dot-color: #33586b; }
-  .pos-dot[data-role="gk"] { --dot-color: var(--ink); }
-
-  .pitch-legend { display: flex; gap: 16px; margin-top: 10px; font-size: 11px; color: var(--ink-dim); }
-  .pitch-legend span { display: inline-flex; align-items: center; gap: 5px; }
-  .pitch-legend .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-
-  /* --- Career pace + footer row (specific to this page) --- */
-  .bottombar {
-    display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 14px; align-items: stretch;
-    padding: 26px 0; border-top: 3px solid var(--ink);
+  .kickoff {
+    margin-top: 36px;
+    padding: 22px 0 0;
+    border-top: 3px double var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
   }
-  .pace-label { align-self: center; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.05em; white-space: nowrap; padding-right: 6px; }
-  .pace-option { border: 1.5px solid var(--ink); padding: 14px 16px; cursor: pointer; }
-  .pace-option .title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.03em; margin-bottom: 3px; }
-  .pace-option .desc { font-size: 11.5px; color: var(--ink-faint); }
-  .pace-option.active { background: var(--ink); }
-  .pace-option.active .title { color: var(--paper); }
-  .pace-option.active .desc { color: var(--paper-dark); }
+  .ticket { font-family: var(--font-display); font-size: 24px; letter-spacing: 0.05em; line-height: 1.1; }
+  .ticket small { display: block; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .kickoff .error { color: var(--red); font-size: 14px; flex-basis: 100%; text-align: right; min-height: 20px; margin: 0; }
 
-  .ticket-footer { display: flex; justify-content: space-between; align-items: center; padding: 18px 0 40px; }
-  .ticket-info { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 0.08em; color: var(--ink-dim); }
-  .btn-row { display: flex; gap: 12px; }
-
-  @media (max-width: 1000px) {
-    .columns { grid-template-columns: 1fr; }
-    .bottombar { grid-template-columns: 1fr; }
+  @media (max-width: 1120px) {
+    .columns { grid-template-columns: 1fr 1fr; }
+    .col-position { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+    .col-position .section-title { grid-column: 1 / -1; }
+    .pos-info { margin-top: 0; }
+  }
+  @media (max-width: 760px) {
+    .columns { grid-template-columns: 1fr; gap: 36px; }
+    .col-position { display: block; }
+    .pos-info { margin-top: 20px; }
+    .paces { grid-template-columns: 1fr; }
+    .kickoff .error { text-align: left; }
   }
 </style>
 </head>
 <body>
 
-  <nav class="site-nav">
-    <div class="logo"><span class="mark">⬢</span> CAREER MANAGER</div>
-    <div class="links">
-      <a href="#" class="current">Career</a>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="home.html" aria-label="Career Manager home">
+      <svg viewBox="0 0 30 34" aria-hidden="true"><path d="M15 1 28 5v11c0 9-6 14-13 17C8 30 2 25 2 16V5z" fill="none" stroke="#efe8d6" stroke-width="2"/><path d="M7 14l8 6 8-6" fill="none" stroke="#a1282a" stroke-width="3"/><circle cx="15" cy="9" r="2.2" fill="#efe8d6"/></svg>
+      Career Manager
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="characterCreation.html" aria-current="page">New career</a>
       <a href="history.html">History</a>
-      <a href="#">How It Works</a>
-      <a href="#">Blog</a>
-    </div>
-    <div class="auth">
-      <a href="#">Log in</a>
-      <a href="#" class="signup">Sign up</a>
-    </div>
-  </nav>
+    </nav>
+  </div>
+</header>
 
-  <div class="subnav">
-    <span>Career Sim / Player Registration / Choose Your Role</span>
-    <span>Step 1 of 3</span>
+<main class="page">
+  <div class="masthead">
+    <div>
+      <div class="kicker">Player registration</div>
+      <h1 class="title">Create your player</h1>
+      <p class="lede">You start at 17 with three contract offers. Choose who you are first.</p>
+    </div>
+    <div class="stamp" id="seasonStamp">Season</div>
   </div>
 
-  <div class="page">
+  <div id="resumeSlot"></div>
 
-    <div class="header-row">
-      <div>
-        <div class="kicker">Player Registration</div>
-        <h1>Define Your Identity</h1>
+  <div class="columns">
+    <!-- 01 Identity -->
+    <section>
+      <h2 class="section-title"><span class="num">01</span> Identity</h2>
+      <div class="jersey" aria-hidden="true">
+        <svg viewBox="0 0 200 210">
+          <path d="M52 18 84 6c6 12 26 12 32 0l32 12 34 36-22 24-14-12v138H54V66L40 78 18 54z" fill="#a1282a" stroke="#1d1e19" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M84 6c6 12 26 12 32 0" fill="none" stroke="#efe8d6" stroke-width="5"/>
+          <path d="M40 78 54 66M160 78l-14-12" stroke="#efe8d6" stroke-width="3"/>
+          <text id="jerseyName" x="100" y="80" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="24" letter-spacing="2" fill="#efe8d6">YOUR NAME</text>
+          <text id="jerseyNumber" x="100" y="166" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="88" fill="#efe8d6">10</text>
+        </svg>
       </div>
-      <div class="stamp">Prospect</div>
-    </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="lastName">Last name</label>
+          <input class="input" id="lastName" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="e.g. Park" />
+          <div class="field-note" id="nameNote">As it appears on the back of the shirt.</div>
+        </div>
+        <div class="field">
+          <label class="label" for="shirtNumber">Number</label>
+          <input class="input mono" id="shirtNumber" type="number" min="1" max="99" step="1" inputmode="numeric" value="10" />
+          <div class="field-note" id="numberNote">1 to 99</div>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label" id="footLabel">Preferred foot</span>
+        <div class="toggle-row" role="group" aria-labelledby="footLabel">
+          <button type="button" class="toggle" data-foot="left" aria-pressed="false">Left</button>
+          <button type="button" class="toggle" data-foot="right" aria-pressed="true">Right</button>
+        </div>
+      </div>
+    </section>
 
-    <div class="columns">
+    <!-- 02 Nationality -->
+    <section>
+      <h2 class="section-title"><span class="num">02</span> Nationality <span class="aside" id="countryCountLabel"></span></h2>
+      <div class="nation-now">
+        <div class="code-box" id="nationCode">ENG</div>
+        <div>
+          <h3 id="nationName">England</h3>
+          <ul class="nation-facts" id="nationFacts"></ul>
+        </div>
+      </div>
+      <label class="sr-only" for="countrySearch">Search nationality</label>
+      <input class="input search" id="countrySearch" type="search" placeholder="Search nationality" autocomplete="off" />
+      <div class="country-list" id="countryList" role="group" aria-label="Nationalities"></div>
+    </section>
 
-      <!-- Identity -->
+    <!-- 03 Position -->
+    <section class="col-position">
+      <h2 class="section-title"><span class="num">03</span> Position <span class="aside">Attacking upwards</span></h2>
       <div>
-        <div class="col-title"><span class="num">01</span> Identity</div>
-
-        <div class="jersey-wrap">
-          <svg width="170" height="190" viewBox="0 0 180 200">
-            <path d="M40 20 L70 5 Q90 20 110 5 L140 20 L160 55 L140 70 L140 190 L40 190 L40 70 L20 55 Z"
-                  fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/>
-            <text x="90" y="60" text-anchor="middle" fill="var(--ink)" font-size="12" font-family="Bebas Neue" letter-spacing="1" id="jerseyName">PARK</text>
-            <text x="90" y="135" text-anchor="middle" fill="var(--red)" font-size="64" font-family="Bebas Neue" id="jerseyNumber">10</text>
+        <div class="pitch" id="pitch" role="group" aria-label="Positions">
+          <svg class="lines" viewBox="0 0 300 360" preserveAspectRatio="none" aria-hidden="true">
+            <g fill="none" stroke="rgba(239,232,214,0.75)" stroke-width="1.6">
+              <rect x="10" y="10" width="280" height="340" />
+              <line x1="10" y1="180" x2="290" y2="180" />
+              <circle cx="150" cy="180" r="34" />
+              <rect x="72" y="10" width="156" height="58" />
+              <rect x="114" y="10" width="72" height="22" />
+              <path d="M122 68a30 30 0 0 0 56 0" />
+              <rect x="72" y="292" width="156" height="58" />
+              <rect x="114" y="328" width="72" height="22" />
+              <path d="M122 292a30 30 0 0 1 56 0" />
+            </g>
+            <circle cx="150" cy="180" r="2.5" fill="rgba(239,232,214,0.75)" />
           </svg>
         </div>
-
-        <div class="field-row">
-          <div>
-            <label class="field-label">Last Name</label>
-            <input type="text" id="lastNameInput" value="Park" />
-          </div>
-          <div>
-            <label class="field-label">Number</label>
-            <select id="numberSelect">
-              <option>7</option>
-              <option selected>10</option>
-              <option>9</option>
-              <option>11</option>
-              <option>4</option>
-            </select>
-          </div>
-        </div>
-
-        <label class="field-label">Preferred Foot</label>
-        <div class="foot-row">
-          <div class="toggle-btn" data-foot="left">Left</div>
-          <div class="toggle-btn active" data-foot="right">Right</div>
+        <div class="legend" aria-hidden="true">
+          <span><i style="background: var(--red)"></i>Attack</span>
+          <span><i style="background: #8a6418"></i>Midfield</span>
+          <span><i style="background: var(--navy)"></i>Defence</span>
+          <span><i style="background: var(--ink)"></i>Goal</span>
         </div>
       </div>
-
-      <!-- Nationality -->
-      <div>
-        <div class="col-title"><span class="num">02</span> Nationality</div>
-        <div class="sub-label">Choose a Country</div>
-
-        <div class="selected-country">
-          <div class="flag-name" id="selectedCountryLabel">🇪🇸 Spain</div>
-          <div class="count-label">211 COUNTRIES</div>
-        </div>
-
-        <label class="field-label">Search Country</label>
-        <input type="text" class="search-input" id="countrySearch" placeholder="Search country" />
-
-        <div class="country-grid" id="countryGrid">
-          <div class="country-item" data-country="Argentina" data-flag="🇦🇷"><span>🇦🇷 Argentina</span><span class="code">ARG</span></div>
-          <div class="country-item" data-country="Brazil" data-flag="🇧🇷"><span>🇧🇷 Brazil</span><span class="code">BRA</span></div>
-          <div class="country-item" data-country="Italy" data-flag="🇮🇹"><span>🇮🇹 Italy</span><span class="code">ITA</span></div>
-          <div class="country-item" data-country="Mexico" data-flag="🇲🇽"><span>🇲🇽 Mexico</span><span class="code">MEX</span></div>
-          <div class="country-item" data-country="Netherlands" data-flag="🇳🇱"><span>🇳🇱 Netherlands</span><span class="code">NED</span></div>
-          <div class="country-item" data-country="Paraguay" data-flag="🇵🇾"><span>🇵🇾 Paraguay</span><span class="code">PAR</span></div>
-          <div class="country-item" data-country="Peru" data-flag="🇵🇪"><span>🇵🇪 Peru</span><span class="code">PER</span></div>
-          <div class="country-item" data-country="Portugal" data-flag="🇵🇹"><span>🇵🇹 Portugal</span><span class="code">POR</span></div>
-          <div class="country-item" data-country="Russia" data-flag="🇷🇺"><span>🇷🇺 Russia</span><span class="code">RUS</span></div>
-          <div class="country-item selected" data-country="Spain" data-flag="🇪🇸"><span>🇪🇸 Spain</span><span class="code">ESP</span></div>
-          <div class="country-item" data-country="Türkiye" data-flag="🇹🇷"><span>🇹🇷 Türkiye</span><span class="code">TUR</span></div>
-          <div class="country-item" data-country="United States" data-flag="🇺🇸"><span>🇺🇸 United States</span><span class="code">USA</span></div>
-          <div class="country-item" data-country="Nigeria" data-flag="🇳🇬"><span>🇳🇬 Nigeria</span><span class="code">NGA</span></div>
-          <div class="country-item" data-country="Japan" data-flag="🇯🇵"><span>🇯🇵 Japan</span><span class="code">JPN</span></div>
-          <div class="country-item" data-country="South Korea" data-flag="🇰🇷"><span>🇰🇷 South Korea</span><span class="code">KOR</span></div>
-          <div class="country-item" data-country="France" data-flag="🇫🇷"><span>🇫🇷 France</span><span class="code">FRA</span></div>
-          <div class="country-item" data-country="Germany" data-flag="🇩🇪"><span>🇩🇪 Germany</span><span class="code">GER</span></div>
-          <div class="country-item" data-country="Croatia" data-flag="🇭🇷"><span>🇭🇷 Croatia</span><span class="code">CRO</span></div>
-        </div>
-
-        <div class="hint-box">
-          <b>Starting country matters.</b>
-          It shapes your academy offers and early career path.
-        </div>
-      </div>
-
-      <!-- Position -->
-      <div>
-        <div class="col-title"><span class="num">03</span> Position</div>
-        <div class="sub-label">Tap the Pitch</div>
-
-        <div class="pitch" id="pitch">
-          <div class="pos-dot active" data-role="attack" data-pos="ST" style="left:50%; top:12%;">ST</div>
-
-          <div class="pos-dot" data-role="midfield" data-pos="LW" style="left:20%; top:24%;">LW</div>
-          <div class="pos-dot" data-role="midfield" data-pos="RW" style="left:80%; top:24%;">RW</div>
-          <div class="pos-dot" data-role="midfield" data-pos="CAM" style="left:50%; top:32%;">CAM</div>
-          <div class="pos-dot" data-role="midfield" data-pos="LM" style="left:16%; top:50%;">LM</div>
-          <div class="pos-dot" data-role="midfield" data-pos="CM" style="left:50%; top:50%;">CM</div>
-          <div class="pos-dot" data-role="midfield" data-pos="RM" style="left:84%; top:50%;">RM</div>
-          <div class="pos-dot" data-role="midfield" data-pos="CDM" style="left:50%; top:64%;">CDM</div>
-
-          <div class="pos-dot" data-role="defense" data-pos="LB" style="left:14%; top:78%;">LB</div>
-          <div class="pos-dot" data-role="defense" data-pos="CB" style="left:50%; top:80%;">CB</div>
-          <div class="pos-dot" data-role="defense" data-pos="RB" style="left:86%; top:78%;">RB</div>
-
-          <div class="pos-dot" data-role="gk" data-pos="GK" style="left:50%; top:95%;">GK</div>
-        </div>
-        <div class="pitch-legend">
-          <span><span class="dot" style="background:var(--red);"></span>Attack</span>
-          <span><span class="dot" style="background:#a9822c;"></span>Midfield</span>
-          <span><span class="dot" style="background:#33586b;"></span>Defense</span>
-          <span><span class="dot" style="background:var(--ink);"></span>Goalkeeper</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="bottombar">
-      <div class="pace-label">Career<br>Pace</div>
-      <div class="pace-option" data-pace="intense">
-        <div class="title">Intense</div>
-        <div class="desc">A decision every season</div>
-      </div>
-      <div class="pace-option active" data-pace="normal">
-        <div class="title">Normal</div>
-        <div class="desc">A decision every 2 seasons</div>
-      </div>
-      <div class="pace-option" data-pace="express">
-        <div class="title">Express</div>
-        <div class="desc">A decision every 3 seasons</div>
-      </div>
-    </div>
-
-    <div class="ticket-footer">
-      <div class="ticket-info">Gate 01 · Academy Intake · Season 2026/27</div>
-      <div class="btn-row">
-        <button class="back-btn" id="backBtn">Back</button>
-        <button class="kickoff-btn" id="playBtn">Kick Off →</button>
-      </div>
-    </div>
-
+      <div class="card pos-info" id="posInfo" aria-live="polite"></div>
+    </section>
   </div>
 
-  <div class="site-footer">
-    <span>Career Manager · Sim Engine 0.1</span>
-    <span>Runs In Your Browser</span>
+  <!-- 04 Pace -->
+  <section class="pace-section">
+    <h2 class="section-title"><span class="num">04</span> Career pace <span class="aside">How often you decide</span></h2>
+    <div class="paces" id="paces" role="group" aria-label="Career pace"></div>
+  </section>
+
+  <div class="kickoff">
+    <div class="ticket" id="ticket"></div>
+    <button type="button" class="btn btn-primary" id="startBtn">Start career &rarr;</button>
+    <p class="error" id="startError" role="alert"></p>
   </div>
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <span>Career Manager · a football career simulator</span>
+    <span>Club and league names are used for identification only. Not affiliated with any club or league.</span>
+  </div>
+</footer>
 
 <script type="module">
-  import { createPlayer } from "../engine/player.js";
+  import { ATTRIBUTE_LABELS, POSITION_ORDER, POSITION_PROFILES } from "../engine/positions.js";
+  import { PACES, PACE_ORDER, DEFAULT_PACE } from "../engine/pace.js";
+  import { allCountries, continentalTournament, describeNationalTier, getCountry } from "../engine/nations.js";
+  import { cleanLastName, createPlayer, currentSeasonStartYear, START_AGE } from "../engine/player.js";
+  import { startCareer, LAST_SEASON_AGE } from "../engine/turn.js";
+  import { getClub } from "../engine/clubInfo.js";
+  import { seasonLabel } from "../engine/format.js";
+  import { esc, loadCareer, saveCareer, crestHtml } from "./components.js";
 
-  const state = {
-    lastName: "Park", number: "10", foot: "right",
-    country: "Spain", countryFlag: "🇪🇸", position: "ST", pace: "normal",
+  const TOP_FLIGHT = { ENG: "Premier League", ESP: "La Liga", GER: "Bundesliga", ITA: "Serie A", FRA: "Ligue 1" };
+  const PITCH_SPOTS = {
+    ST: [50, 12], LW: [17, 21], RW: [83, 21], CAM: [50, 32], LM: [13, 45], CM: [50, 49],
+    RM: [87, 45], CDM: [50, 63], LB: [13, 76], CB: [50, 80], RB: [87, 76], GK: [50, 93],
+  };
+  const LINE_NAMES = { attack: "Attack", midfield: "Midfield", defense: "Defence", goalkeeper: "Goalkeeper" };
+
+  const state = { lastName: "", number: 10, foot: "right", countryCode: "ENG", position: "ST", pace: DEFAULT_PACE };
+  const $ = (id) => document.getElementById(id);
+
+  $("seasonStamp").textContent = `Season ${seasonLabel(currentSeasonStartYear())}`;
+
+  // ------------------------------------------------ career in progress
+  const existing = loadCareer();
+  if (existing && !existing.retired) {
+    const club = getClub(existing.career.clubId);
+    $("resumeSlot").innerHTML = `
+      <div class="notice">
+        ${club ? crestHtml(club, 40) : ""}
+        <p><b>${esc(existing.identity.lastName.toUpperCase())}</b> is mid-career: ${esc(POSITION_PROFILES[existing.identity.position].name)}, age ${existing.age}${club ? ", " + esc(club.name) : ""}. Starting a new career replaces it.</p>
+        <a class="btn btn-small" href="game.html">Continue that career</a>
+      </div>`;
+  }
+
+  // ------------------------------------------------ identity
+  const nameInput = $("lastName");
+  const numberInput = $("shirtNumber");
+
+  function renderJersey() {
+    const name = (state.lastName || "Your name").toUpperCase();
+    const nameEl = $("jerseyName");
+    nameEl.textContent = name;
+    if (name.length > 7) {
+      nameEl.setAttribute("textLength", String(Math.min(118, name.length * 12)));
+      nameEl.setAttribute("lengthAdjust", "spacingAndGlyphs");
+    } else {
+      nameEl.removeAttribute("textLength");
+      nameEl.removeAttribute("lengthAdjust");
+    }
+    $("jerseyNumber").textContent = state.number || "";
+  }
+
+  nameInput.addEventListener("input", () => {
+    state.lastName = cleanLastName(nameInput.value);
+    nameInput.removeAttribute("aria-invalid");
+    $("nameNote").className = "field-note";
+    $("nameNote").textContent = "As it appears on the back of the shirt.";
+    renderJersey();
+    renderTicket();
+  });
+
+  numberInput.addEventListener("input", () => {
+    const n = Number(numberInput.value);
+    state.number = Number.isInteger(n) && n >= 1 && n <= 99 ? n : null;
+    numberInput.setAttribute("aria-invalid", state.number ? "false" : "true");
+    $("numberNote").className = state.number ? "field-note" : "field-note error";
+    $("numberNote").textContent = state.number ? "1 to 99" : "Pick a number from 1 to 99";
+    renderJersey();
+    renderTicket();
+  });
+
+  document.querySelectorAll("[data-foot]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      state.foot = btn.dataset.foot;
+      document.querySelectorAll("[data-foot]").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      renderTicket();
+    }),
+  );
+
+  // ------------------------------------------------ nationality
+  const countries = [...allCountries()].sort((a, b) => a.name.localeCompare(b.name));
+  $("countryCountLabel").textContent = `${countries.length} nations`;
+
+  function renderCountryList() {
+    const query = $("countrySearch").value.trim().toLowerCase();
+    const shown = countries.filter((c) => !query || c.name.toLowerCase().includes(query) || c.code.toLowerCase().includes(query));
+    $("countryList").innerHTML = shown.length
+      ? shown
+          .map(
+            (c) => `<button type="button" class="country" data-code="${c.code}" aria-pressed="${c.code === state.countryCode}">
+              <span>${esc(c.name)}</span><span class="code">${c.code}</span></button>`,
+          )
+          .join("")
+      : `<div class="no-results">No nation matches "${esc(query)}".</div>`;
+  }
+
+  function renderNation() {
+    const country = getCountry(state.countryCode);
+    const tier = describeNationalTier(country.code);
+    const continental = continentalTournament(country.code);
+    const home = TOP_FLIGHT[country.league];
+    $("nationCode").textContent = country.code;
+    $("nationName").textContent = country.name;
+    $("nationFacts").innerHTML = `
+      <li><b>${tier.strength}</b> national team · call-up from OVR ${tier.callUp}</li>
+      <li>Plays the World Cup and the ${esc(continental)}</li>
+      <li>${home ? `Home league: <b>${esc(home)}</b>. Your first offers include clubs from home.` : "No home league in the game. Your first offers come from across Europe."}</li>`;
+  }
+
+  $("countrySearch").addEventListener("input", renderCountryList);
+  $("countryList").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-code]");
+    if (!btn) return;
+    state.countryCode = btn.dataset.code;
+    document.querySelectorAll("#countryList [data-code]").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+    renderNation();
+    renderTicket();
+  });
+
+  // ------------------------------------------------ position
+  $("pitch").insertAdjacentHTML(
+    "beforeend",
+    POSITION_ORDER.map((pos) => {
+      const [x, y] = PITCH_SPOTS[pos];
+      const profile = POSITION_PROFILES[pos];
+      return `<button type="button" class="token" data-pos="${pos}" data-line="${profile.line}" style="left:${x}%;top:${y}%" aria-pressed="${pos === state.position}" aria-label="${profile.name}">${pos}</button>`;
+    }).join(""),
+  );
+
+  const dots = (level) => {
+    const n = Math.max(0, Math.min(5, Math.round(level)));
+    return `<span class="dots" aria-label="${n} out of 5">${"●".repeat(n)}<span class="off">${"●".repeat(5 - n)}</span></span>`;
   };
 
-  const jerseyName = document.getElementById("jerseyName");
-  const jerseyNumber = document.getElementById("jerseyNumber");
+  function renderPosition() {
+    const p = POSITION_PROFILES[state.position];
+    const weights = Object.entries(p.weights).filter(([, w]) => w > 0).sort((a, b) => b[1] - a[1]);
+    const maxW = weights[0][1];
+    const output =
+      state.position === "GK"
+        ? `<span>Clean sheets ${dots(5)}</span><span>Goals ${dots(0)}</span>`
+        : `<span>Goals ${dots((p.goalFactor / 0.38) * 5 + 0.3)}</span><span>Assists ${dots((p.assistFactor / 0.24) * 5)}</span>`;
+    $("posInfo").innerHTML = `
+      <div class="pos-head"><span class="pos-code">${state.position}</span><div><b>${esc(p.name)}</b><span>${LINE_NAMES[p.line]}</span></div></div>
+      <p class="pos-blurb">${esc(p.blurb)}</p>
+      <span class="label">OVR is built from</span>
+      <div class="bars">${weights
+        .map(
+          ([key, w]) => `<div class="bar-row"><span>${ATTRIBUTE_LABELS[key]}</span><span class="bar-track"><span class="bar-fill" style="display:block;width:${(w / maxW) * 100}%"></span></span><span class="pct">${Math.round(w * 100)}%</span></div>`,
+        )
+        .join("")}</div>
+      <span class="label">Typical season</span>
+      <div class="output">${output}</div>`;
+  }
 
-  document.getElementById("lastNameInput").addEventListener("input", (e) => {
-    state.lastName = e.target.value;
-    jerseyName.textContent = (e.target.value || "PLAYER").toUpperCase();
+  $("pitch").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-pos]");
+    if (!btn) return;
+    state.position = btn.dataset.pos;
+    document.querySelectorAll("[data-pos]").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+    renderPosition();
+    renderTicket();
   });
 
-  document.getElementById("numberSelect").addEventListener("change", (e) => {
-    state.number = e.target.value;
-    jerseyNumber.textContent = e.target.value;
+  // ------------------------------------------------ pace
+  const totalSeasons = LAST_SEASON_AGE - START_AGE + 1;
+  $("paces").innerHTML = PACE_ORDER.map((id) => {
+    const pace = PACES[id];
+    return `<button type="button" class="pace" data-pace="${id}" aria-pressed="${id === state.pace}">
+      <b>${pace.label}</b><span>${pace.blurb}</span><small>Up to ${Math.ceil(totalSeasons / pace.seasons)} transfer windows</small></button>`;
+  }).join("");
+  $("paces").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-pace]");
+    if (!btn) return;
+    state.pace = btn.dataset.pace;
+    document.querySelectorAll("[data-pace]").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+    renderTicket();
   });
 
-  document.querySelectorAll(".toggle-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".toggle-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      state.foot = btn.dataset.foot;
-    });
-  });
+  // ------------------------------------------------ summary + start
+  function renderTicket() {
+    const name = state.lastName ? state.lastName.toUpperCase() : "Unnamed";
+    $("ticket").innerHTML = `${esc(name)} · #${state.number ?? "?"}
+      <small>${esc(POSITION_PROFILES[state.position].name)} · ${esc(getCountry(state.countryCode).name)} · ${state.foot === "left" ? "Left" : "Right"} foot · ${PACES[state.pace].label} pace</small>`;
+    $("startError").textContent = "";
+  }
 
-  document.querySelectorAll(".country-item").forEach((item) => {
-    item.addEventListener("click", () => {
-      document.querySelectorAll(".country-item").forEach((i) => i.classList.remove("selected"));
-      item.classList.add("selected");
-      state.country = item.dataset.country;
-      state.countryFlag = item.dataset.flag;
-      document.getElementById("selectedCountryLabel").textContent = `${item.dataset.flag} ${item.dataset.country}`;
-    });
-  });
-
-  document.getElementById("countrySearch").addEventListener("input", (e) => {
-    const q = e.target.value.toLowerCase();
-    document.querySelectorAll(".country-item").forEach((item) => {
-      item.style.display = item.dataset.country.toLowerCase().includes(q) ? "flex" : "none";
-    });
-  });
-
-  document.querySelectorAll(".pos-dot").forEach((dot) => {
-    dot.addEventListener("click", () => {
-      document.querySelectorAll(".pos-dot").forEach((d) => d.classList.remove("active"));
-      dot.classList.add("active");
-      state.position = dot.dataset.pos;
-    });
-  });
-
-  document.querySelectorAll(".pace-option").forEach((opt) => {
-    opt.addEventListener("click", () => {
-      document.querySelectorAll(".pace-option").forEach((o) => o.classList.remove("active"));
-      opt.classList.add("active");
-      state.pace = opt.dataset.pace;
-    });
-  });
-
-  document.getElementById("backBtn").addEventListener("click", () => {
-    console.log("Back pressed — would return to previous screen.");
-  });
-
-  // This is the real engine hookup: Kick Off now builds an actual player
-  // object via createPlayer() instead of just showing the raw form state.
-  document.getElementById("playBtn").addEventListener("click", () => {
+  $("startBtn").addEventListener("click", () => {
+    const errors = [];
+    if (state.lastName.replace(/[^\p{L}]/gu, "").length < 2) {
+      errors.push("Enter a last name (at least 2 letters).");
+      nameInput.setAttribute("aria-invalid", "true");
+      $("nameNote").className = "field-note error";
+      $("nameNote").textContent = "At least 2 letters";
+    }
+    if (!state.number) errors.push("Pick a shirt number from 1 to 99.");
+    if (errors.length) {
+      $("startError").textContent = errors.join(" ");
+      (state.number ? nameInput : numberInput).focus();
+      return;
+    }
+    if (existing && !existing.retired && !confirm(`This replaces your career in progress (${existing.identity.lastName}, age ${existing.age}). Start a new career?`)) {
+      return;
+    }
     const player = createPlayer({
-      lastName: state.lastName || "Player",
+      lastName: state.lastName,
       number: state.number,
       preferredFoot: state.foot,
-      country: state.country,
+      countryCode: state.countryCode,
       position: state.position,
+      pace: state.pace,
     });
-    player.meta = { pace: state.pace, countryFlag: state.countryFlag };
-
-    // Hand the player off to the next screen. sessionStorage survives a
-    // page navigation within the same tab, which is exactly what we need
-    // here (game.html doesn't exist yet — this is wired ahead of it).
-    sessionStorage.setItem("careerManagerPlayer", JSON.stringify(player));
-
-    console.log("Player created:", player);
-    const dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
-    window.location.href = dir + "game.html";
+    startCareer(player);
+    if (!saveCareer(player)) {
+      $("startError").textContent = "Your browser is blocking local storage, so the game can't keep your career between pages.";
+      return;
+    }
+    window.location.href = "game.html";
   });
-</script>
 
+  renderJersey();
+  renderCountryList();
+  renderNation();
+  renderPosition();
+  renderTicket();
+</script>
 </body>
 </html>

@@ -1,104 +1,88 @@
-import injuryEvents from "../data/events/injury.js";
-import transferEvents from "../data/events/transfer.js";
-import trainingEvents from "../data/events/training.js";
-import nationalTeamEvents from "../data/events/nationalTeam.js";
-import scandalEvents from "../data/events/scandal.js";
-import managerEvents from "../data/events/manager.js";
-import { getByPath, setByPath } from "./player.js";
-import { computeOverall } from "./rating.js";
+// The extra event that sometimes follows a transfer window: picking one
+// that fits the player, showing it, and resolving the chosen option.
 
-// All event categories combined into one pool. To add a new category,
-// create a new file under data/events/ and import + spread it here.
-// Note: evt_transfer_window (inside transferEvents) is handled specially
-// by engine/turn.js — it's guaranteed every season and isn't drawn from
-// this pool via weightedRandomPick like everything else.
-export const EVENT_POOL = [
-  ...injuryEvents,
-  ...transferEvents,
-  ...trainingEvents,
-  ...nationalTeamEvents,
-  ...scandalEvents,
-  ...managerEvents,
-];
+import EVENTS from "../data/events/index.js";
+import { getClub } from "./clubInfo.js";
+import { getCountry, nationalTier } from "./nations.js";
+import { getOverall } from "./rating.js";
+import { roleFor, roleRank } from "./squad.js";
+import { applyEffects, describeChoice } from "./effects.js";
+import { weightedPick } from "./random.js";
+import { getPositionProfile } from "./positions.js";
 
-function meetsConditions(event, player) {
-  if (player.age < event.minAge || player.age > event.maxAge) return false;
-  const c = event.conditions || {};
-  if (c.excludesFlag && player.flags[c.excludesFlag]) return false;
-  if (c.requiresFlag && !player.flags[c.requiresFlag]) return false;
-  if (c.minOvr && computeOverall(player) < c.minOvr) return false;
+const BY_ID = new Map(EVENTS.map((event) => [event.id, event]));
+const RECENT_MEMORY = 5;
+
+function eventContext(player) {
+  const club = getClub(player.career.clubId);
+  const country = getCountry(player.identity.countryCode);
+  const ovr = getOverall(player);
+  return {
+    player,
+    ovr,
+    club,
+    roleRank: roleRank(roleFor(player).id),
+    abroad: !country?.league || country.league !== club.country,
+    nationalTeam: player.status.nationalTeam,
+    captain: player.status.captain,
+    callUp: nationalTier(player.identity.countryCode).callUp,
+  };
+}
+
+function isEligible(event, player, ctx) {
+  if (event.minAge && player.age < event.minAge) return false;
+  if (event.maxAge && player.age > event.maxAge) return false;
+  if (event.positions && !event.positions.includes(player.identity.position)) return false;
+  if (player.recentEvents.includes(event.id)) return false;
+  if (event.once && player.seenEvents.includes(event.id)) return false;
+  if (event.when && !event.when(ctx)) return false;
   return true;
 }
 
-export function filterEligibleEvents(pool, player) {
-  return pool.filter((e) => meetsConditions(e, player));
+function fillText(text, player) {
+  const club = getClub(player.career.clubId);
+  return text
+    .replaceAll("{club}", club?.name ?? "the club")
+    .replaceAll("{nation}", player.identity.country)
+    .replaceAll("{position}", getPositionProfile(player.identity.position).name.toLowerCase());
 }
 
-export function weightedRandomPick(events) {
-  const totalWeight = events.reduce((sum, e) => sum + e.weight, 0);
-  let roll = Math.random() * totalWeight;
-  for (const e of events) {
-    roll -= e.weight;
-    if (roll <= 0) return e;
-  }
-  return events[events.length - 1];
+// Returns a ready-to-show (and JSON-safe) event, or null if nothing fits.
+export function drawEvent(player) {
+  const ctx = eventContext(player);
+  const event = weightedPick(EVENTS.filter((e) => isEligible(e, player, ctx)));
+  if (!event) return null;
+  return {
+    id: event.id,
+    category: event.category,
+    title: event.title,
+    text: fillText(event.text, player),
+    choices: event.choices.map((choice) => ({
+      id: choice.id,
+      label: fillText(choice.label, player),
+      hint: choice.hint ?? "",
+      preview: describeChoice(choice),
+    })),
+  };
 }
 
-// Paths that should stay within a sane bounded range even after many
-// seasons of accumulated effects — without this, morale in particular
-// can drift to nonsensical values over a long career.
-const CLAMPS = {
-  "condition.morale": [0, 100],
-  "stats.attack": [1, 99],
-  "stats.defense": [1, 99],
-  "stats.speed": [1, 99],
-  "stats.stamina": [1, 99],
-  "stats.technique": [1, 99],
-  "stats.mental": [1, 99],
-};
+export function resolveEvent(player, eventId, choiceId) {
+  const event = BY_ID.get(eventId);
+  const choice = event?.choices.find((c) => c.id === choiceId);
+  if (!choice) throw new Error(`Unknown choice ${eventId}/${choiceId}`);
 
-export function applyEffects(effects, player) {
-  for (const [path, value] of Object.entries(effects)) {
-    if (path.startsWith("push:")) {
-      const arrPath = path.slice("push:".length);
-      const arr = getByPath(player, arrPath);
-      arr.push(value);
-      continue;
-    }
-
-    const current = getByPath(player, path);
-    let next;
-    if (typeof current === "number") {
-      next = current + value;
-    } else {
-      setByPath(player, path, value); // booleans / direct assignment
-      continue;
-    }
-
-    const clamp = CLAMPS[path];
-    if (clamp) next = Math.max(clamp[0], Math.min(clamp[1], next));
-    setByPath(player, path, next);
+  let effects = choice.effects ?? {};
+  let text = choice.text ?? "";
+  if (choice.outcomes?.length) {
+    const outcome = weightedPick(choice.outcomes, (o) => o.chance);
+    effects = outcome.effects ?? {};
+    text = outcome.text;
   }
+
+  const changes = applyEffects(player, effects);
+  player.recentEvents = [event.id, ...player.recentEvents].slice(0, RECENT_MEMORY);
+  if (!player.seenEvents.includes(event.id)) player.seenEvents.push(event.id);
+  return { title: event.title, text: fillText(text, player), changes };
 }
 
-// Some choices are risky: instead of one fixed set of effects, they define
-// `outcomes`, a list of { probability, label, positive, effects, resultText }.
-// This rolls which outcome actually happens. Plain choices (just `effects` +
-// `resultText`, no `outcomes`) are returned unchanged for backward compatibility.
-export function resolveChoiceOutcome(choice) {
-  if (!choice.outcomes) {
-    return { effects: choice.effects, resultText: choice.resultText };
-  }
-  const roll = Math.random();
-  let cumulative = 0;
-  for (const outcome of choice.outcomes) {
-    cumulative += outcome.probability;
-    if (roll <= cumulative) {
-      return { effects: outcome.effects, resultText: outcome.resultText };
-    }
-  }
-  // Floating point safety net — probabilities should sum to 1, but if they
-  // don't quite, fall back to the last outcome rather than returning nothing.
-  const last = choice.outcomes[choice.outcomes.length - 1];
-  return { effects: last.effects, resultText: last.resultText };
-}
+export const eventCount = () => EVENTS.length;
